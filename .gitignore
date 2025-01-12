@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+*.yy.c
+*.tab.h
+*.tab.c
