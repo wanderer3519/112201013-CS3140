@@ -4,7 +4,7 @@ all: calculator.l calculator.y
 	cc lex.yy.c y.tab.c -o calculator -w -lm
 
 clean:
-	rm -rf *.yy.c *.tab.c *.tab.h calc
+	rm -rf *.yy.c *.tab.c *.tab.h calculator
 
 hoc: hoc_all.y
 	yacc hoc_all.y &&\
