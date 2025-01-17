@@ -1,39 +1,82 @@
 %{
-	/* Definition section */
-#include <stdio.h>
+    #include <stdio.h>
+    #include <ctype.h>
+    #include <signal.h>
+    #include <setjmp.h>
+
+    double mem[26]; // Memory for variables A-Z
+
+    int yylex();
+    void yyerror(const char* s);
+
+    jmp_buf begin;
 %}
 
-%token NUMBER ID
-// setting the precedence 
-// and associativity of operators 
+%union {
+    double val;
+    int index;
+}
+
+%token <val> NUMBER
+%token <index> VAR
+%type <val> expr
 %left '+' '-'
 %left '*' '/'
+%left UNARYMINUS
 
-/* Rule Section */
-%% 
-E : T	 {
-				printf("Result = %d\n", $$);
-				return 0;
-			}
+%%
+list:
+    /* epsilon */
+    | list '\n'
+    | list expr '\n' { printf("\tResult: %.8g\n", $2); }
+    ;
 
-T : 
-	T '+' T { $$ = $1 + $3; }
-	| T '-' T { $$ = $1 - $3; }
-	| T '*' T { $$ = $1 * $3; }
-	| T '/' T { $$ = $1 / $3; }
-	| '-' NUMBER { $$ = -$2; }
-	| '-' ID { $$ = -$2; }
-	| '(' T ')' { $$ = $2; }
-	| NUMBER { $$ = $1; }
-	| ID { $$ = $1; };
+expr:
+      NUMBER { $$ = $1; }
+    | VAR { $$ = mem[$1]; }
+    | VAR '=' expr { $$ = mem[$1] = $3; }
+    | expr '+' expr { $$ = $1 + $3; }
+    | expr '-' expr { $$ = $1 - $3; }
+    | expr '*' expr { $$ = $1 * $3; }
+    | expr '/' expr { 
+        if ($3 == 0.0)
+            execerror("division by zero", "");
+        $$ = $1 / $3; 
+    }
+    | '(' expr ')' { $$ = $2; }
+    | '-' expr %prec UNARYMINUS { $$ = -$2; }
+    ;
+
 %%
 
-int main() {
-	printf("Enter the expression\n");
-	yyparse();
+void execerror(const char* s, const char* t) {
+    warning(s, t);
+    longjmp(begin, 1);
 }
 
-/* For printing error messages */
-int yyerror(char* s) {
-	printf("\nExpression is invalid\n");
+void warning(const char* s, const char* t) {
+    fprintf(stderr, "Error: %s", s);
+    if (t)
+        fprintf(stderr, " %s", t);
+    fprintf(stderr, "\n");
 }
+
+void yyerror(const char* s) {
+    warning(s, NULL);
+}
+
+void fpecatch(int signum) {
+    execerror("floating point exception", NULL);
+}
+
+int main() {
+    signal(SIGFPE, fpecatch); // Handle floating-point exceptions
+    for (int i = 0; i < 26; i++) mem[i] = 0.0; // Initialize variable memory
+    if (setjmp(begin) != 0) {
+        printf("Restarting...\n");
+    }
+    yyparse();
+    return 0;
+}
+
+

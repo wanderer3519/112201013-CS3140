@@ -1,19 +1,27 @@
 %{ 
-	/* Definition section*/
 	#include "y.tab.h" 
-	extern int yylval;
 %}
 
 %% 
-[0-9]+ { 
-			yylval = atoi(yytext); 
-			return NUMBER; 
-			} 
+[ \t]+ ; /* For skipping whitespaces */ 
 
-[a-zA-Z]+ { return ID; } 
-[ \t]+		 ; /*For skipping whitespaces*/
+[0-9]+(\.[0-9]+)? {
+    /* Includes floating point numbers also */
+	yylval.val = atof(yytext); 
+	return NUMBER; 
+} 
 
-\n		 { return 0; } 
-.		 { return yytext[0]; } 
+[A-Z]+ { 
+    /* Variables */   
+    yylval.index = yytext[0] - 'A';
+    return VAR; 
+}
 
-%% 
+\n { return '\n'; } /*  Newlines */
+.	{ return yytext[0]; } /* Rest all tokens returned same as before */ 
+
+%%
+ 
+int yywrap(){
+    return 1;
+}
