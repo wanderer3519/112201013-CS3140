@@ -1,12 +1,12 @@
-all: 
+all: calculator.l calculator.y
 	lex calculator.l &&\
 	yacc -d calculator.y &&\
-	cc lex.yy.c y.tab.c -o calc -w -lm
+	cc lex.yy.c y.tab.c -o calculator -w -lm
 
 clean:
 	rm -rf *.yy.c *.tab.c *.tab.h calc
 
-hoc:
+hoc: hoc_all.y
 	yacc hoc_all.y &&\
 	cc -c yy.tab.c -o hoc1
 

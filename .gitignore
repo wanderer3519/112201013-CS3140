@@ -34,3 +34,7 @@
 *.yy.c
 *.tab.h
 *.tab.c
+
+# The hoc1 and calculator are ignored
+*/hoc1
+*/calculator

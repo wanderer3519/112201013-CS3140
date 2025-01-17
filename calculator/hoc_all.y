@@ -1,3 +1,14 @@
+/* 
+    This is a version of the code entirely written in yacc file
+    I have pushed it just for reference.
+
+    I also have pushed a yacc, lex files seperately in the required format
+    To run this use
+    
+    $ make hoc 
+    $ ./hoc1
+ */
+
 %{
     #include <stdio.h>
     #include <ctype.h>
