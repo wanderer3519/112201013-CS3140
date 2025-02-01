@@ -1,110 +1,111 @@
-/* 
-    Conventional combination lex and yacc files for the calculator.
-    To run this use
-
-    $ make
-    $ ./calculator
- */
-
 %{
     #include <stdio.h>
     #include <ctype.h>
     #include <signal.h>
     #include <setjmp.h>
+    #include "calculator.hpp"
 
     // Memory for variables A-Z
     double mem[26]; 
 
-    // yylex(): Done by lex file
+    // Function prototypes
     int yylex();
-
-    // For error handling: Not fully tested
     void yyerror(const char* s);
-
+    void warning(const char* s, const char* t);
+    void execerror(const char* s, const char* t);
     jmp_buf begin;
+
+    void printAST(TreeNode* node) {
+        if(!node) return;
+        
+        printAST(node->left);
+        
+
+        if (node->op)
+            std::cout << node->op << ' ';
+        else if (node->varIndex != -1)
+            std::cout << "VAR[" << char('A' + node->varIndex) << "] ";
+        else
+            std::cout << node->value << ' ';
+        printAST(node->right);
+    }
+    
+
 %}
 
-/* Using a union for yylval in order to add the functionality of variables */
+/* Define token types manually for Lex */
 %union {
-    double val;
+    int val;
     int index;
+    TreeNode* Node;
 }
 
-/* Tokens: Number and Variables */
 %token <val> NUMBER
 %token <index> VAR
 
-%type <val> expr
+%type <Node> expr
 
 %left '+' '-'
 %left '*' '/'
-%left UNARYMINUS
+%right UNARYMINUS
 
 %%
-/* Grammar for list */
 list:
-    /* epsilon */
+    /* empty */
     | list '\n'
-    | list expr '\n' { printf("\tResult: %.8g\n", $2); }
+    | list expr '\n' { 
+        printf("Parsed expression\n");
+        printAST($2); 
+        printf("\n");
+    }
     ;
 
-/* Grammar for expression */
 expr:
-      NUMBER { $$ = $1; }
-    | VAR { $$ = mem[$1]; }
-    | VAR '=' expr { $$ = mem[$1] = $3; }
-    | expr '+' expr { $$ = $1 + $3; }
-    | expr '-' expr { $$ = $1 - $3; }
-    | expr '*' expr { $$ = $1 * $3; }
+      NUMBER { $$ = new TreeNode($1); }
+    | VAR { $$ = new TreeNode($1); }
+    | VAR '=' expr { $$ = new TreeNode('=', new TreeNode($1), $3); }
+    | expr '+' expr { $$ = new TreeNode('+', $1, $3); }
+    | expr '-' expr { $$ = new TreeNode('-', $1, $3); }
+    | expr '*' expr { $$ = new TreeNode('*', $1, $3); }
     | expr '/' expr { 
-        if ($3 == 0.0)
+        if ($3->value == 0.0)
             execerror("division by zero", "");
-        $$ = $1 / $3; 
+        $$ = new TreeNode('/', $1, $3); 
     }
     | '(' expr ')' { $$ = $2; }
-    | '-' expr %prec UNARYMINUS { $$ = -$2; }
+    | '-' expr %prec UNARYMINUS { $$ = new TreeNode('-', nullptr, $2); }
     ;
 
 %%
 
-/* Error handling: Not fully tested */
+void warning(const char* s, const char* t) {
+    fprintf(stderr, "Error: %s", s);
+    if (t) fprintf(stderr, " %s", t);
+    fprintf(stderr, "\n");
+}
+
 void execerror(const char* s, const char* t) {
     warning(s, t);
     longjmp(begin, 1);
 }
 
-void warning(const char* s, const char* t) {
-    fprintf(stderr, "Error: %s", s);
-    if (t)
-        fprintf(stderr, " %s", t);
-    fprintf(stderr, "\n");
-}
-
 void yyerror(const char* s) {
-    warning(s, NULL);
+    fprintf(stderr, "Error: %s\n", s);
 }
 
-void fpecatch(int signum) {
-    execerror("floating point exception", NULL);
-}
-
-/* Main: Code starts here */
 int main() {
-    // To handle floating-point exceptions
-    signal(SIGFPE, fpecatch); 
+    signal(SIGFPE, [](int) { execerror("floating point exception", NULL); });
 
-    // A good practice to initialize variable memory
     for (int i = 0; i < 26; i++) 
         mem[i] = 0.0; 
-    
-    // Restarting when an error occurs
+
     if (setjmp(begin) != 0) {
         printf("Restarting...\n");
     }
 
-    // Parsing: Done by lex
+    printf("Calculator started. Enter expressions:\n");
     yyparse();
+    printf("Exiting calculator.\n");
+
     return 0;
 }
-
-

@@ -1,27 +1,19 @@
-%{ 
-	#include "y.tab.h" 
+%{
+    #include <stdio.h>
+    #include "calculator.hpp"
+    #include "y.tab.h"
 %}
 
-%% 
-[ \t]+ ; /* For skipping whitespaces */ 
-
-[0-9]+(\.[0-9]+)? {
-    /* Includes floating point numbers also */
-	yylval.val = atof(yytext); 
-	return NUMBER; 
-} 
-
-[A-Z]+ { 
-    /* Variables */   
-    yylval.index = yytext[0] - 'A';
-    return VAR; 
-}
-
-\n { return '\n'; } /*  Newlines */
-.	{ return yytext[0]; } /* Rest all tokens returned same as before */ 
+%%
+[0-9]+     { printf("NUMBER: %s\n", yytext); yylval.val = atoi(yytext); return NUMBER; }
+[A-Z]      { printf("VAR: %s\n", yytext); yylval.index = yytext[0] - 'A'; return VAR; }
+[+\-*/=()] { printf("OP: %s\n", yytext); return *yytext; }
+[ \t]    { /* Ignore whitespace */ }
+\n { return '\n'; }
+.          { printf("Unexpected character: %s\n", yytext); return 0; }
 
 %%
- 
+
 int yywrap(){
     return 1;
 }
