@@ -17,11 +17,21 @@
 
 %{	
 	#include <stdio.h>
-	#define YYSTYPE double
 	int yylex();
 	void yyerror(char*);
-    int i;	
+    int i;
 %}
+
+%union{
+	Node* node;
+	int val;
+	Func* fun; 
+};
+
+
+/* %type <node> Gdecl_sec Gdecl_list */
+%type <node> Gid ret_type
+%type <fun> func
 
 %token BEG END
 %token T_INT T_BOOL
@@ -45,20 +55,25 @@
 %left LOGICAL_NOT
 %%
 
-	Prog	:	Gdecl_sec Fdef_sec MainBlock
+	Prog:	Gdecl_sec Fdef_sec MainBlock
 		;
 		
-	Gdecl_sec:	DECL Gdecl_list ENDDECL{}
+	Gdecl_sec:	DECL Gdecl_list ENDDECL { }
 		;
 		
 	Gdecl_list: 
 		| 	Gdecl Gdecl_list
 		;
 		
+	/* gdecl: integer var1, var2, var3;
+		ret_type: integer
+		glist: var1, var2, var3;
+		gid: 
+	*/
 	Gdecl 	:	ret_type Glist ';'
 		;
 		
-	ret_type:	T_INT		{ }
+	ret_type:	T_INT		{ $$ = new Node($1, T_INT); }
 		;
 		
 	Glist 	:	Gid
@@ -67,12 +82,11 @@
 		|	func ',' Glist
 		;
 	
-	Gid	:	VAR		{ 				}
-		|	Gid '[' NUM ']'	{                                                   }
-
+	Gid	:	VAR	{ $$ = new Node($1, VAR); }
+		|	Gid '[' NUM ']'	{ $$ = $1; }
 		;
 		
-	func 	:	VAR '(' arg_list ')' 					{ 					}
+	func:	VAR '(' arg_list ')' { $$ = Func(); }
 		;
 			
 	arg_list:	

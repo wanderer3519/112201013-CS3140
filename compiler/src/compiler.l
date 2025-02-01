@@ -15,7 +15,7 @@
  *  along with SIL Compiler.  If not, see <http://www.gnu.org/licenses/>.
  */
 %{
-    #define YYSTYPE NODPTR
+    #include "y.tab.h"
     int Lineno;
     int wflag;
 %}
@@ -33,8 +33,8 @@ begin			{ return BEG; }
 end				{ return END; }	
 read			{ return READ; }
 write			{ return WRITE; }	
-integer			{ return T_BOOL; }	
-boolean			{ return T_INT; }
+integer			{ return T_INT; }	
+boolean			{ return T_BOOL; }
 decl			{ return DECL; }
 enddecl			{ return ENDDECL; }
 
