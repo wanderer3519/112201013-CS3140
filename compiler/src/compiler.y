@@ -147,12 +147,13 @@
 		;
 
 	Lid_list:	Lid
-		|	Lid ',' Lid_list"
+		|	Lid ',' Lid_list';'
 		;
 		
 	Lid	:	VAR			{ 						}
 		;
 
+	/* needed for assignment 2 */
 	stmt_list:	/* NULL */		{  }
 		|	statement stmt_list	{						}
 		|	error ';' 		{  }
@@ -230,10 +231,18 @@
 		|	var_expr '[' expr ']'	{                                                 }
 		;
 %%
-void yyerror ( char  *s) {
+void yyerror(char* s){
    fprintf (stderr, "%s\n", s);
- }
+}
 
-main(){
-yyparse();
+int main(int argc, char* argv[]){
+	FILE *file = fopen(argv[1], "r");
+    if (!file) {
+        perror("fopen");
+        return 1;
+    }
+
+	yyin = file;
+	yyparse();
+	fclose(file);
 }

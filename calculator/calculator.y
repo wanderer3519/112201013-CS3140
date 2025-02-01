@@ -12,7 +12,7 @@
     int yylex();
     void yyerror(const char* s);
     void warning(const char* s, const char* t);
-    void execerror(const char* s, const char* t);
+    void execerror(const char* s, const char* t);    extern FILE* yyin;
     jmp_buf begin;
 
     void printAST(TreeNode* node) {
@@ -93,8 +93,10 @@ void yyerror(const char* s) {
     fprintf(stderr, "Error: %s\n", s);
 }
 
-int main() {
-    signal(SIGFPE, [](int) { execerror("floating point exception", NULL); });
+/* Main: Code starts here */
+int main(int argc, char* argv[]) {
+    // To handle floating-point exceptions
+    signal(SIGFPE, fpecatch); 
 
     for (int i = 0; i < 26; i++) 
         mem[i] = 0.0; 
@@ -103,9 +105,18 @@ int main() {
         printf("Restarting...\n");
     }
 
-    printf("Calculator started. Enter expressions:\n");
+    FILE *file = fopen(argv[1], "r");
+    if (!file) {
+        perror("fopen");
+        return 1;
+    }
+
+    yyin = file;
+
+    // Parsing: Done by lex
     yyparse();
     printf("Exiting calculator.\n");
 
+    fclose(file);
     return 0;
 }

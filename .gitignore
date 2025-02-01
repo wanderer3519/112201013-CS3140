@@ -38,3 +38,5 @@
 # The hoc1 and calculator are ignored
 */hoc1
 */calculator
+
+*/.vscode
