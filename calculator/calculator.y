@@ -20,16 +20,16 @@
         
         printAST(node->left);
         
+        if(node->type == tokenOp){
+            printf("%c ", node->value);
+        }
+        else if(node->type == tokenVar){
+            printf("VAR ");
+        }
+        else printf("%d ", node->value);
 
-        if (node->op)
-            std::cout << node->op << ' ';
-        else if (node->varIndex != -1)
-            std::cout << "VAR[" << char('A' + node->varIndex) << "] ";
-        else
-            std::cout << node->value << ' ';
         printAST(node->right);
     }
-    
 
 %}
 
@@ -61,19 +61,19 @@ list:
     ;
 
 expr:
-      NUMBER { $$ = new TreeNode($1); }
-    | VAR { $$ = new TreeNode($1); }
-    | VAR '=' expr { $$ = new TreeNode('=', new TreeNode($1), $3); }
-    | expr '+' expr { $$ = new TreeNode('+', $1, $3); }
-    | expr '-' expr { $$ = new TreeNode('-', $1, $3); }
-    | expr '*' expr { $$ = new TreeNode('*', $1, $3); }
+      NUMBER { $$ = new TreeNode(tokenNum, $1); }
+    | VAR { $$ = new TreeNode(tokenVar, $1); }
+    | VAR '=' expr { $$ = new TreeNode(tokenOp, '=', new TreeNode(tokenVar, $1), $3); }
+    | expr '+' expr { $$ = new TreeNode(tokenOp, '+', $1, $3); }
+    | expr '-' expr { $$ = new TreeNode(tokenOp, '-', $1, $3); }
+    | expr '*' expr { $$ = new TreeNode(tokenOp, '*', $1, $3); }
     | expr '/' expr { 
         if ($3->value == 0.0)
             execerror("division by zero", "");
-        $$ = new TreeNode('/', $1, $3); 
+        $$ = new TreeNode(tokenOp, '/', $1, $3); 
     }
     | '(' expr ')' { $$ = $2; }
-    | '-' expr %prec UNARYMINUS { $$ = new TreeNode('-', nullptr, $2); }
+    | '-' expr %prec UNARYMINUS { $$ = new TreeNode(tokenOp, '-', nullptr, $2); }
     ;
 
 %%
