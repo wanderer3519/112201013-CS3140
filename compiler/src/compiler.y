@@ -20,18 +20,17 @@
 	int yylex();
 	void yyerror(char*);
     int i;
+	vector<Symbol*> sym;
 %}
 
 %union{
-	Node* node;
+	TreeNode* node;
 	int val;
-	Func* fun; 
 };
 
 
 /* %type <node> Gdecl_sec Gdecl_list */
-%type <node> Gid ret_type
-%type <fun> func
+%type <node> var_list arg_type arg_list1 arg_list arg func ret_type Gid
 
 %token BEG END
 %token T_INT T_BOOL
@@ -55,57 +54,70 @@
 %left LOGICAL_NOT
 %%
 
-	Prog:	Gdecl_sec Fdef_sec MainBlock
-		;
-		
-	Gdecl_sec:	DECL Gdecl_list ENDDECL { }
-		;
-		
-	Gdecl_list: 
-		| 	Gdecl Gdecl_list
-		;
-		
-	/* gdecl: integer var1, var2, var3;
-		ret_type: integer
-		glist: var1, var2, var3;
-		gid: 
-	*/
-	Gdecl 	:	ret_type Glist ';'
-		;
-		
-	ret_type:	T_INT		{ $$ = new Node($1, T_INT); }
-		;
-		
-	Glist 	:	Gid
-		| 	func 
-		|	Gid ',' Glist 
-		|	func ',' Glist
-		;
+Prog:	Gdecl_sec Fdef_sec MainBlock
+	;
 	
-	Gid	:	VAR	{ $$ = new Node($1, VAR); }
-		|	Gid '[' NUM ']'	{ $$ = $1; }
-		;
+Gdecl_sec:	DECL Gdecl_list ENDDECL { }
+	;
+	
+Gdecl_list: 
+	| 	Gdecl Gdecl_list
+	;
+	
+/* gdecl: integer var1, var2, var3;
+	ret_type: integer
+	glist: var1, var2, var3;
+	gid: var1 (VAR)
+	gid: var2
+	gid: var3
+*/
+Gdecl 	:	ret_type Glist ';'
+	;
+	
+ret_type:	T_INT		{ $$ = new TreeNode(tokenKey, $1); }
+	;
+	
+Glist 	:	Gid
+	| 	func 
+	|	Gid ',' Glist 
+	|	func ',' Glist
+	;
+
+Gid	:	VAR	{ $$ = new TreeNode(new VarClass(sym[i++])); }
+	|	Gid '[' NUM ']'	{ $$ = $1; }
+	;
+	
+/* 
+	func: read(integer a, integer b) 
+	arg_list: integer a, integer b
+	arg_list1: integer a, integer b
+	arg: integer a
+	arg: integer b
+
+	var_list: a
+	var_list: b
+*/
+
+func:	VAR '(' arg_list ')' { $$ = new TreeNode(tokenVar, $1, nullptr, $3); }
+	;
 		
-	func:	VAR '(' arg_list ')' { $$ = Func(); }
-		;
-			
-	arg_list:	
-		|	arg_list1
-		;
-		
-	arg_list1:	arg_list1 ';' arg
-		|	arg
-		;
-		
-	arg 	:	arg_type var_list	
-		;
-		
-	arg_type:	T_INT		 {  }
-		;
+arg_list:	
+	|	arg_list1
+	;
+	
+arg_list1:	arg_list1 ';' arg
+	|	arg
+	;
+	
+arg 	:	arg_type var_list	
+	;
+	
+arg_type:	T_INT		 { $$ = new TreeNode(tokenKey, $1); }
+	;
 
 var_list:	
-		VAR 		 { }
-	|	VAR ',' var_list { 	}
+		VAR 		 { $$ = new TreeNode(new VarClass(sym[i++])); }
+	|	VAR ',' var_list { $$ = new TreeNode(new VarClass(sym[i++]), nullptr, $3); }
 	;
 	
 Fdef_sec:	
@@ -257,13 +269,13 @@ void yyerror(char* s){
 }
 
 int main(int argc, char* argv[]){
-	FILE *file = fopen(argv[1], "r");
+	/* FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
         return 1;
     }
 
-	yyin = file;
+	yyin = file; */
 	yyparse();
 	fclose(file);
 }

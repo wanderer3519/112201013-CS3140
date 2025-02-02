@@ -5,7 +5,7 @@
 %}
 
 %%
-[0-9]+     { printf("NUMBER: %s\n", yytext); yylval.val = atoi(yytext); return NUMBER; }
+[0-9]+(\.[0-9]+)?    { printf("NUMBER: %s\n", yytext); yylval.val = atof(yytext); return NUMBER; }
 [A-Z]      { printf("VAR: %s\n", yytext); yylval.index = yytext[0] - 'A'; return VAR; }
 [+\-*/=()] { printf("OP: %s\n", yytext); return *yytext; }
 [ \t]    { /* Ignore whitespace */ }

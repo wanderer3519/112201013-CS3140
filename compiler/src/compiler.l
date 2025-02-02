@@ -62,9 +62,9 @@ false			{ return F; }
 [-+*/=()><;,\{\}\[\]\%]     { return yytext[0]; }
 			
 ["]             { return yytext[0]; }
-\n              { return '\n'; }
+"\\n"           ;
 [ \t]			;
-.				{ return yytext[0]; }		
+.				{ yyerror("Invalid character"); }		
 	
 /* Regular expression for single line comment */  
 \/\/(.*) ; 
@@ -72,8 +72,3 @@ false			{ return F; }
 /* Regular expression for multi line comment */   
 {start}.*{end} ; 
 %%
-
-
-int yywrap(){
-    return 1;
-}

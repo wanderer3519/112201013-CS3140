@@ -1,42 +1,59 @@
 #ifndef TREE_H
 #define TREE_H
+#include <cstring>
 
-#include <vector>
-using namespace std;
+enum NodeType { tokenOp, tokenKey, tokenVar, tokenNum };
 
-struct Node{
+struct Symbol {
     char* name;
-    int type;
-    int value;
+    int type;  // Data type (e.g., int, float, etc.)
+    union {
+        int intValue;
+        float floatValue;
+    } value;
+};
 
-    Node* left;
-    Node* right;
-    Node* next;
+struct VarClass {
+    Symbol* left;  // Symbol table entry
+    VarClass* right;  // Next variable in the list
+    char* name;  // Variable name
 
-    Node(char* _name, int _type, Node* _left = nullptr, Node* _right = nullptr){
-        name = _name;
-        type = _type;
-        left = _left;
-        right = _right;
+    VarClass(Symbol* sym) : left(sym), right(nullptr) {}
+    VarClass(Symbol* sym, VarClass* _right) : left(sym), right(_right) {}
+};
+
+struct TreeNode {
+    struct TreeNode* left;
+    struct TreeNode* right;
+    NodeType type;
+    
+    union {
+        char* name;     // For operators and keywords
+        int numValue;   // For numbers
+        struct VarClass* var;  // For variables linking to the symbol table
+    } data;
+
+    // Constructor for operator or keyword nodes
+    TreeNode(NodeType type, const char* nodeName, TreeNode* left = nullptr, TreeNode* right = nullptr)
+        : left(left), right(right), type(type) {
+        if (type == tokenOp || type == tokenKey) {
+            data.name = new char[strlen(nodeName) + 1];  // Allocate memory for name
+            strcpy(data.name, nodeName);
+        }
+    }
+
+    // Constructor for number nodes
+    TreeNode(int value, TreeNode* left = nullptr, TreeNode* right = nullptr)
+        : left(left), right(right), type(tokenNum) {
+        data.numValue = value;
+    }
+
+    // Constructor for variable nodes
+    TreeNode(VarClass* varPtr, TreeNode* left = nullptr, TreeNode* right = nullptr)
+        : left(left), right(right), type(tokenVar) {
+        data.var = varPtr;
     }
 };
 
-struct Symbol{
-    char* name;
-    int type;
-    Symbol* next;
-
-    Symbol(char* _name, int _type, Symbol* _next = nullptr): name(_name), type(_type), next(_next) {}
-};
-
-struct Func{
-    char* name;
-    int returnType;
-    Symbol* params;
-    Func* next;
-
-    Func(char* _name, int _retType, Symbol* _params = nullptr, Func* _next = nullptr): 
-        name(_name), returnType(_retType), params(_params), next(_next) {};
-};
 
 #endif

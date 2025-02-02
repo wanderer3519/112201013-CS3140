@@ -4,7 +4,7 @@
     #include <stdarg.h>
     #include "calc3.h"
 
-    #define SIZEOF_NODETYPE ((char *)&p->con - (char *)p)
+    // #define SIZEOF_NODETYPE ((char *)&p->con - (char *)p)
     
     /* prototypes */
     nodeType *opr(int oper, int nops, ...);
@@ -138,7 +138,7 @@ void freeNode(nodeType *p) {
 }
 
 void yyerror(char *s) {
-    fprintf(stdout, "%s\n", s);
+    fprintf(stderr, "%s\n", s);
 }
 
 int main(void) {
