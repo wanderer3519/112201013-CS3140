@@ -4,11 +4,21 @@ using namespace std;
 typedef enum { typeCon, typeId, typeOpr } nodeEnum;
 
 struct Nodeptr{
-    int tokenType;
+    int type;
+    int val;
     vector<Nodeptr*> children;
 
-    Nodeptr(int tokenVal){
-        tokenType = tokenVal;
+    Nodeptr(nodeEnum _type, int _val){
+        type = _type;
+        val = _val;
+    }
+
+    Nodeptr(nodeEnum _type, int _val, vector<Nodeptr*> _children){
+        type = _type;
+        val = _val;
+        for(auto _child: _children){
+            children.push_back(_child);
+        }
     }
 };
 

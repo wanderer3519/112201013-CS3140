@@ -62,7 +62,7 @@ false			{ return F; }
 [-+*/=()><;,\{\}\[\]\%]     { return yytext[0]; }
 			
 ["]             { return yytext[0]; }
-"\\n"           ;
+\n              { return '\n'; }
 [ \t]			;
 .				{ return yytext[0]; }		
 	
@@ -72,3 +72,8 @@ false			{ return F; }
 /* Regular expression for multi line comment */   
 {start}.*{end} ; 
 %%
+
+
+int yywrap(){
+    return 1;
+}

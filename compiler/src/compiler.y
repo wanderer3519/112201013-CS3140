@@ -103,133 +103,154 @@
 	arg_type:	T_INT		 {  }
 		;
 
-	var_list:	VAR 		 { }
-		|	VAR ',' var_list { 	}
-		;
-		
-	Fdef_sec:	
-		|	Fdef_sec Fdef
-		;
-		
-	Fdef	:	func_ret_type func_name '(' FargList ')' '{' Ldecl_sec BEG stmt_list ret_stmt END '}'	{	 				}
-		;
-		
-	func_ret_type:	T_INT		{ }
-		;
-			
-	func_name:	VAR		{ 					}
-		;
-		
-	FargList:	arg_list	{ 					}
-		;
-
-	ret_stmt:	RETURN expr ';'	{ 					}
-		;
-			
-	MainBlock: 	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }
-					  
-		;
-		
-	main	:	MAIN		{ 					}
-		;
-		
-	Ldecl_sec:	DECL Ldecl_list ENDDECL	{}
-		;
-
-	Ldecl_list:		
-		|	Ldecl Ldecl_list
-		;
-
-	Ldecl	:	type Lid_list ';'		
-		;
-
-	type	:	T_INT			{ }
-		;
-
-	Lid_list:	Lid
-		|	Lid ',' Lid_list';'
-		;
-		
-	Lid	:	VAR			{ 						}
-		;
-
-	/* needed for assignment 2 */
-	stmt_list:	/* NULL */		{  }
-		|	statement stmt_list	{						}
-		|	error ';' 		{  }
-		;
-
-	statement:	assign_stmt  ';'		{ 							 }
-		|	read_stmt ';'		{ }
-		|	write_stmt ';'		{ }
-		|	cond_stmt 		{ }
-		|	func_stmt ';'		{ }
-		;
-
-	read_stmt:	READ '(' var_expr ')' {						 }
-		;
-
-	write_stmt:	WRITE '(' expr ')' 	{  }
-		 | WRITE '(''"' str_expr '"'')'      { }
-
-		;
+var_list:	
+		VAR 		 { }
+	|	VAR ',' var_list { 	}
+	;
 	
-	assign_stmt:	var_expr '=' expr 	{ 						}
-		;
-
-	cond_stmt:	IF expr THEN stmt_list ENDIF 	{ 						}
-		|	IF expr THEN stmt_list ELSE stmt_list ENDIF 	{ 						}
-	        |    FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'                                             {                                                 }
-		;
+Fdef_sec:	
+	|	Fdef_sec Fdef
+	;
 	
-	func_stmt:	func_call 		{ 						}
-		;
-		
-	func_call:	VAR '(' param_list ')'	{ 						   }
-		;
-		
-	param_list:				
-		|	param_list1		
-		;
-		
-	param_list1:	para			
-		|	para ',' param_list1	
-		;
-
-	para	:	expr			{ 						}
-		;
-
-	expr	:	NUM 			{ 			}
-		|	'-' NUM			{  						   }
-		|	var_expr		{ 			}
-		|	T			{ 						  	}
-		|	F			{ 	}
-		|	'(' expr ')'		{  			}
-
-		|	expr '+' expr 		{ 						}
-		|	expr '-' expr	 	{ 						}
-		|	expr '*' expr 		{ 			}
-		|	expr '/' expr 		{ 					}
-		|	expr '%' expr 		{ 						}
-		|	expr '<' expr		{ 						}
-		|	expr '>' expr		{ 						}
-		|	expr GREATERTHANOREQUAL expr				{ 						}
-		|	expr LESSTHANOREQUAL expr	{  						}
-		|	expr NOTEQUAL expr			{ 						}
-		|	expr EQUALEQUAL expr	{ 						}
-		|	LOGICAL_NOT expr	{ 						}
-		|	expr LOGICAL_AND expr	{ 						}
-		|	expr LOGICAL_OR expr	{ 						}
-		|	func_call		{  }
-
-		;
-	str_expr :  VAR                       {}
-                  | str_expr VAR   { }
-                ;
+Fdef:	
+		func_ret_type func_name '(' FargList ')' '{' Ldecl_sec BEG stmt_list ret_stmt END '}'	{	 				}
+	;
 	
-	var_expr:	VAR	{ 				  }
-		|	var_expr '[' expr ']'	{                                                 }
-		;
+func_ret_type:	
+		T_INT		{ }
+	;
+		
+func_name:	
+		VAR		{ 					}
+	;
+	
+FargList:	
+		arg_list	{ 					}
+	;
+ret_stmt:	
+		RETURN expr ';'	{ 					}
+	;
+		
+MainBlock: 	
+	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }			  
+	;
+	
+main:	MAIN		{ 					}
+	;
+	
+Ldecl_sec:	DECL Ldecl_list ENDDECL	{}
+	;
+
+Ldecl_list:		
+	|	Ldecl Ldecl_list
+	;
+
+Ldecl:	
+	type Lid_list ';'		
+	;
+
+type:	
+	T_INT			{ }
+	;
+
+Lid_list:	
+	Lid
+	|	Lid ',' Lid_list';'
+	;
+	
+Lid	:	
+	VAR			{ 						}
+	;
+
+
+/* needed for assignment 2 */
+stmt_list:	
+		/* NULL */		{  }
+	|	statement stmt_list	{						}
+	|	error ';' 		{  }
+	;
+
+statement:	
+	assign_stmt  ';'		{ 							 }
+	|	read_stmt ';'		{ }
+	|	write_stmt ';'		{ }
+	|	cond_stmt 		{ }
+	|	func_stmt ';'		{ }
+	;
+
+read_stmt:	
+	READ '(' var_expr ')' {						 }
+	;
+
+write_stmt:	
+	WRITE '(' expr ')' 	{  }
+	|	WRITE '(''"' str_expr '"'')'      { }
+	;
+
+assign_stmt:	
+	var_expr '=' expr 	{ 						}
+	;
+
+cond_stmt:	
+	IF expr THEN stmt_list ENDIF 	{ 						}
+	|	IF expr THEN stmt_list ELSE stmt_list ENDIF 	{ 						}
+    |   FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'   {                                                 }
+	;
+
+func_stmt:	
+	func_call 		{ 						}
+	;
+	
+func_call:	
+	VAR '(' param_list ')'	{ 						   }
+	;
+	
+param_list:				
+	|	param_list1		
+	;
+	
+param_list1:	
+	para			
+	|	para ',' param_list1	
+	;
+
+para:	
+	expr { 						}
+	;
+
+expr:	
+	NUM 			{ 			}
+	|	'-' NUM			{  						   }
+	|	var_expr		{ 			}
+	|	T			{ 						  	}
+	|	F			{ 	}
+	|	'(' expr ')'		{  			}
+	|	expr '+' expr 		{ 						}
+	|	expr '-' expr	 	{ 						}
+	|	expr '*' expr 		{ 			}
+	|	expr '/' expr 		{ 					}
+	|	expr '%' expr 		{ 						}
+	|	expr '<' expr		{ 						}
+	|	expr '>' expr		{ 						}
+	|	expr GREATERTHANOREQUAL expr				{ 						}
+	|	expr LESSTHANOREQUAL expr	{  						}
+	|	expr NOTEQUAL expr			{ 						}
+	|	expr EQUALEQUAL expr	{ 						}
+	|	LOGICAL_NOT expr	{ 						}
+	|	expr LOGICAL_AND expr	{ 						}
+	|	expr LOGICAL_OR expr	{ 						}
+	|	func_call		{  }
+	;
+	
+str_expr:  
+	VAR                       {}
+    | str_expr VAR   { }
+    ;
+
+var_expr:	
+	VAR	{ 				  }
+	|	var_expr '[' expr ']'	{                                                 }
+	;
 %%
 void yyerror(char* s){
    fprintf (stderr, "%s\n", s);

@@ -4,4 +4,4 @@ all:
 	cc lex.yy.c y.tab.c
 
 clean:
-	rm -rf *.yy.c *.yy.h *.tab.c *.out
+	rm -rf *.yy.c  *.tab.[hc] *.out

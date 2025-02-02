@@ -12,7 +12,8 @@
     int yylex();
     void yyerror(const char* s);
     void warning(const char* s, const char* t);
-    void execerror(const char* s, const char* t);    extern FILE* yyin;
+    void execerror(const char* s, const char* t);    
+    // extern FILE* yyin;
     jmp_buf begin;
 
     void printAST(TreeNode* node) {
@@ -96,27 +97,27 @@ void yyerror(const char* s) {
 /* Main: Code starts here */
 int main(int argc, char* argv[]) {
     // To handle floating-point exceptions
-    signal(SIGFPE, fpecatch); 
+    /* signal(SIGFPE, fpecatch);  */
 
     for (int i = 0; i < 26; i++) 
         mem[i] = 0.0; 
 
-    if (setjmp(begin) != 0) {
+    /* if (setjmp(begin) != 0) {
         printf("Restarting...\n");
-    }
+    } */
 
-    FILE *file = fopen(argv[1], "r");
+    /* FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
         return 1;
     }
 
-    yyin = file;
+    yyin = file; */
 
     // Parsing: Done by lex
     yyparse();
     printf("Exiting calculator.\n");
 
-    fclose(file);
+    /* fclose(file); */
     return 0;
 }
