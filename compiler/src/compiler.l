@@ -15,9 +15,11 @@
  *  along with SIL Compiler.  If not, see <http://www.gnu.org/licenses/>.
  */
 %{
+    #include "tree.hpp"
     #include "y.tab.h"
     int Lineno;
     int wflag;
+    extern void yyerror(char* s);
 %}
 
 %option noyywrap
@@ -66,9 +68,7 @@ false			{ return F; }
 [ \t]			;
 .				{ yyerror("Invalid character"); }		
 	
-/* Regular expression for single line comment */  
-\/\/(.*) ; 
+\/\/(.*) ; /* Regular expression for single line comment */   
 
-/* Regular expression for multi line comment */   
-{start}.*{end} ; 
+{start}.*{end} ; /* Regular expression for multi line comment */    
 %%

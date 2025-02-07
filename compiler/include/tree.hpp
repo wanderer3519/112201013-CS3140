@@ -1,26 +1,61 @@
-#include <vector>
+#ifndef TREE_HPP
+#define TREE_HPP
+
+#include <cstring>
 using namespace std;
 
-typedef enum { typeCon, typeId, typeOpr } nodeEnum;
+enum NodeType { tokenOp, tokenKey, tokenVar, tokenNum };
 
-struct Nodeptr{
-    int type;
-    int val;
-    vector<Nodeptr*> children;
+struct Symbol {
+    char* name;
+    int type;  // Data type (e.g., int, float, etc.)
+    union {
+        int intValue;
+        float floatValue;
+    } value;
+};
 
-    Nodeptr(nodeEnum _type, int _val){
-        type = _type;
-        val = _val;
+struct VarClass {
+    Symbol* left;  // Symbol table entry
+    VarClass* right;  // Next variable in the list
+    char* name;  // Variable name
+
+    VarClass(Symbol* sym) : left(sym), right(nullptr) {}
+    VarClass(Symbol* sym, VarClass* _right) : left(sym), right(_right) {}
+};
+
+struct TreeNode {
+    struct TreeNode* left;
+    struct TreeNode* right;
+    NodeType type;
+    
+    union {
+        char* name;     // For operators and keywords
+        int numValue;   // For numbers
+        struct VarClass* var;  // For variables linking to the symbol table
+    } data;
+
+    // Constructor for operator or keyword nodes
+    TreeNode(NodeType type, const char* nodeName, TreeNode* left = nullptr, TreeNode* right = nullptr)
+        : left(left), right(right), type(type) {
+        if (type == tokenOp || type == tokenKey) {
+            data.name = new char[strlen(nodeName) + 1];  // Allocate memory for name
+            strcpy(data.name, nodeName);
+        }
     }
 
-    Nodeptr(nodeEnum _type, int _val, vector<Nodeptr*> _children){
-        type = _type;
-        val = _val;
-        for(auto _child: _children){
-            children.push_back(_child);
-        }
+    // Constructor for number nodes
+    TreeNode(int value, TreeNode* left = nullptr, TreeNode* right = nullptr)
+        : left(left), right(right), type(tokenNum) {
+        data.numValue = value;
+    }
+
+    // Constructor for variable nodes
+    TreeNode(VarClass* varPtr, TreeNode* left = nullptr, TreeNode* right = nullptr)
+        : left(left), right(right), type(tokenVar) {
+        data.var = varPtr;
     }
 };
 
-Nodeptr* insert(Nodeptr* root, vector<Nodeptr*> children);
-// Nodeptr* remove(Nodeptr* root, Nodeptr* child);
+
+#endif
