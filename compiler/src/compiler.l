@@ -19,7 +19,7 @@
     #include "y.tab.h"
     int Lineno;
     int wflag;
-    extern void yyerror(char* s);
+    extern void yyerror(const char* s);
 %}
 
 %option noyywrap
@@ -59,16 +59,20 @@ NOT				{ return LOGICAL_NOT; }
 true			{ return T; }	
 false			{ return F; }
 
-{digit}+		{ return NUM; }
+{digit}+		{ return NUM; } /* no float support */
 {letter}({letter}|{digit})*	{ return VAR; }
 [-+*/=()><;,\{\}\[\]\%]     { return yytext[0]; }
 			
 ["]             { return yytext[0]; }
 "\\n"           ;
 [ \t]			;
-.				{ yyerror("Invalid character"); }		
+.				{ yyerror("Invalid character 234"); }		
 	
 \/\/(.*) ; /* Regular expression for single line comment */   
 
 {start}.*{end} ; /* Regular expression for multi line comment */    
 %%
+
+/* int yywrap(){
+    return 1;
+} */

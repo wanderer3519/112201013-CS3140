@@ -20,9 +20,31 @@
 	#include <stdio.h>
 
 	int yylex();
-	void yyerror(char*);
-    int i;
-	Symbol* sym[1024];
+	void yyerror(const char* s);
+    // int i;
+	// Symbol* sym[1024];
+
+	void preorder(TreeNode* root){
+		if(!root) return;
+
+		switch(root->type){
+			case tokenVar:
+			printf("VAR ");
+			break;
+
+			case tokenOp:
+			printf("%s ", root->name);
+			break;
+
+			case tokenVal:
+			printf("%s ", root->numValue);
+			break;
+		}
+
+		preorder(root->left);
+		preorder(root->right);
+	}
+
 %}
 
 %union{
@@ -32,7 +54,7 @@
 
 
 /* %type <node> Gdecl_sec Gdecl_list */
-%type <node> arg_list1 arg_list arg func ret_type Gid expr var_expr func_call param_list para param_list1 str_expr
+%type <node> arg_list1 arg_list arg func ret_type Gid expr var_expr func_call param_list para param_list1 str_expr assign_stmt Gdecl_list
 
 %token BEG END
 %token <val> T_INT T_BOOL
@@ -59,7 +81,10 @@
 Prog:	Gdecl_sec Fdef_sec MainBlock
 	;
 	
-Gdecl_sec:	DECL Gdecl_list ENDDECL { }
+Gdecl_sec:	DECL Gdecl_list ENDDECL { 
+		printf("You are right\n");
+		// preorder($2); // here
+ 	}
 	;
 	
 Gdecl_list: 
@@ -76,17 +101,17 @@ Gdecl_list:
 Gdecl 	:	ret_type Glist ';'
 	;
 	
-ret_type:	T_INT		{ $$ = new TreeNode(tokenKey, new TreeNode($1)); }
+ret_type:	T_INT		{ $$ = new TreeNode($1, tokenKey); }
 	;
 	
-Glist 	:	Gid
+Glist:	Gid
 	| 	func 
 	|	Gid ',' Glist 
 	|	func ',' Glist
 	;
 
-Gid	:	VAR	{ $$ = new TreeNode(new VarClass(sym[i++])); }
-	|	Gid '[' NUM ']'	{ $$ = new TreeNode(tokenOp, "Index", new TreeNode($3)); }
+Gid	:	VAR	{ $$ = new TreeNode($1, tokenVar); }
+	|	Gid '[' NUM ']'	{ /* $$ = new TreeNode( "Index tokenOp,", new TreeNode($3)); */ }
 	;
 	
 /* 
@@ -100,7 +125,7 @@ Gid	:	VAR	{ $$ = new TreeNode(new VarClass(sym[i++])); }
 	var_list: b
 */
 
-func:	VAR '(' arg_list ')' { $$ = new TreeNode(tokenVar, "CALL",  new TreeNode($1), $3); }
+func:	VAR '(' arg_list ')' { $$ = new TreeNode($1, tokenVar,  new TreeNode($1, tokenVar), $3); }
 	;
 		
 arg_list:	
@@ -108,16 +133,16 @@ arg_list:
 	;
 	
 arg_list1:
-    arg_list1 ',' arg { $$ = new TreeNode(tokenKey, "ArgList", $1, $3); }
-    | arg { $$ = new TreeNode(tokenKey, "ArgList", $1, nullptr); }
+    arg_list1 ',' arg { $$ = new TreeNode("ArgList", tokenKey,  $1, $3); }
+    | arg { $$ = new TreeNode("ArgList", tokenKey, $1, nullptr); }
     ;
 
 arg:
     expr { $$ = $1; }  // Argument is just an expression
     ;
 
-/* arg_type:	T_INT		 { $$ = new TreeNode(tokenKey, $1); } */
-	;
+/* arg_type:	T_INT		 { $$ = new TreeNode(tokenKey, $1); }
+	; */
 
 /* var_list:	
 		VAR 		 { $$ = new TreeNode(new VarClass(sym[i++])); }
@@ -133,7 +158,7 @@ Fdef:
 	;
 	
 func_ret_type:	
-		T_INT		{ }
+		T_INT		{ } /* Only int is return type */
 	;
 		
 func_name:	
@@ -149,6 +174,7 @@ ret_stmt:
 		
 MainBlock: 	
 	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }			  
+	| stmt_list
 	;
 	
 main:	MAIN		{ 					}
@@ -181,7 +207,7 @@ Lid	:
 
 /* needed for assignment 2 */
 stmt_list:	
-		/* NULL */		{  }
+		/* NULL */		{ /* maybe display the symbol table here */ }
 	|	statement stmt_list	{						}
 	|	error ';' 		{  }
 	;
@@ -203,8 +229,12 @@ write_stmt:
 	|	WRITE '(''"' str_expr '"'')'      { }
 	;
 
+/* use this */
 assign_stmt:	
-	var_expr '=' expr 	{ 						}
+	var_expr '=' expr 	{ 
+		printf("Control Reached :)\n"); 
+		$$ = new TreeNode("=", tokenOp, $1, $3);
+	}
 	;
 
 cond_stmt:	
@@ -217,7 +247,7 @@ func_stmt:
 	func_call 		{ 						}
 	;
 	
-func_call:	VAR '(' param_list ')'	{ $$ = new TreeNode(tokenKey, "CALL", new TreeNode(new VarClass(sym[i++])), $3); }
+func_call:	VAR '(' param_list ')'	{ $$ = new TreeNode('C', tokenKey, new TreeNode($1, tokenVar), $3); }
 	;
 	
 param_list:				
@@ -234,41 +264,42 @@ para:
 	;
 
 expr:	
-	NUM 			{ $$ = new TreeNode($1); }
-	|	'-' NUM			{ $$ = new TreeNode(tokenOp, "-", nullptr, new TreeNode($2)); }
+	NUM 			{ $$ = new TreeNode($1, tokenVal); }
+	|	'-' NUM			{ $$ = new TreeNode( "-", tokenOp, nullptr, new TreeNode($2, tokenVal)); }
 	|	var_expr		{ $$ = $1; }
-	|	T			{ $$ = new TreeNode($1); }
-	|	F			{ $$ = new TreeNode($1); }
+	|	T			{ $$ = new TreeNode($1, tokenKey); }
+	|	F			{ $$ = new TreeNode($1, tokenKey); }
 	|	'(' expr ')'		{ $$ = $2; }
-	|	expr '+' expr 		{ $$ = new TreeNode(tokenOp, "+", $1, $3); }
-	|	expr '-' expr	 	{ $$ = new TreeNode(tokenOp, "-", $1, $3); }
-	|	expr '*' expr 		{ $$ = new TreeNode(tokenOp, "*", $1, $3); }
-	|	expr '/' expr 		{ $$ = new TreeNode(tokenOp, "/", $1, $3); }
-	|	expr '%' expr 		{ $$ = new TreeNode(tokenOp, "%", $1, $3); }
-	|	expr '<' expr		{ $$ = new TreeNode(tokenOp, "<", $1, $3); }
-	|	expr '>' expr		{ $$ = new TreeNode(tokenOp, ">", $1, $3); }
-	|	expr GREATERTHANOREQUAL expr	{ $$ = new TreeNode(tokenOp, ">=", $1, $3);		}
-	|	expr LESSTHANOREQUAL expr		{ $$ = new TreeNode(tokenOp, "<=", $1, $3); 	}
-	|	expr NOTEQUAL expr				{ $$ = new TreeNode(tokenOp, "!=", $1, $3);		}
-	|	expr EQUALEQUAL expr			{ $$ = new TreeNode(tokenOp, "==", $1, $3);		}
-	|	LOGICAL_NOT expr				{ $$ = new TreeNode(tokenOp, "!", nullptr, $2);	}
-	|	expr LOGICAL_AND expr			{ $$ = new TreeNode(tokenOp, "&&", $1, $3);		}
-	|	expr LOGICAL_OR expr			{ $$ = new TreeNode(tokenOp, "||", $1, $3);		}
+	|	expr '+' expr 		{ $$ = new TreeNode( "+", tokenOp, $1, $3); }
+	|	expr '-' expr	 	{ $$ = new TreeNode( "-", tokenOp, $1, $3); }
+	|	expr '*' expr 		{ $$ = new TreeNode( "*", tokenOp, $1, $3); }
+	|	expr '/' expr 		{ $$ = new TreeNode( "/", tokenOp, $1, $3); }
+	|	expr '%' expr 		{ $$ = new TreeNode( "%", tokenOp, $1, $3); }
+	|	expr '<' expr		{ $$ = new TreeNode( "<", tokenOp, $1, $3); }
+	|	expr '>' expr		{ $$ = new TreeNode( ">", tokenOp, $1, $3); }
+	|	expr GREATERTHANOREQUAL expr	{ $$ = new TreeNode( ">=", tokenOp, $1, $3);		}
+	|	expr LESSTHANOREQUAL expr		{ $$ = new TreeNode( "<=", tokenOp, $1, $3); 	}
+	|	expr NOTEQUAL expr				{ $$ = new TreeNode( "!=", tokenOp, $1, $3);		}
+	|	expr EQUALEQUAL expr			{ $$ = new TreeNode( "==", tokenOp, $1, $3);		}
+	|	LOGICAL_NOT expr				{ $$ = new TreeNode( "!", tokenOp, nullptr, $2);	}
+	|	expr LOGICAL_AND expr			{ $$ = new TreeNode( "&&", tokenOp, $1, $3);		}
+	|	expr LOGICAL_OR expr			{ $$ = new TreeNode( "||", tokenOp, $1, $3);		}
 	|	func_call		{ $$ = $1; }
 	;
 
 str_expr:
-    VAR { $$ = new TreeNode(new VarClass(sym[i++])); }  // Single variable node
-  | str_expr VAR { $$ = new TreeNode(tokenKey, "Concat", new TreeNode(new VarClass(sym[i++])), new TreeNode($2)); }
+    VAR { $$ = new TreeNode($1, tokenVar); }  // Single variable node
+  | str_expr VAR { $$ = new TreeNode("Concat", tokenVar, $1, new TreeNode($2, tokenVar)); }
   ;
 
 var_expr:	
-	VAR	{ $$ = new TreeNode(new VarClass(sym[i++])); }
-	|	var_expr '[' expr ']'	{ $$ = new TreeNode('V', $1, $3); }
+	VAR	{ $$ = new TreeNode($1, tokenVar); }
+	|	var_expr '[' expr ']'	{ /* $$ = new TreeNode('V', $1, $3); */ }
 	;
 %%
-void yyerror(char* s){
-   fprintf (stderr, "%s\n", s);
+void yyerror(const char* s){
+	printf("Error is here\n");
+   	fprintf (stderr, "%s\n", s);
 }
 
 int main(int argc, char* argv[]){
