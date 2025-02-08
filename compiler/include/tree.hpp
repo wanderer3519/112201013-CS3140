@@ -101,12 +101,13 @@ struct TreeNode {
     // Constructor for operator or keyword nodes or variable
     TreeNode(const char* nodeName, NodeType _type, TreeNode* _left = nullptr, TreeNode* _right = nullptr){
         if (_type == tokenOp || _type == tokenKey) {
-            name = new char[strlen(nodeName)];  // Allocate memory for name
-            strncpy(name, nodeName, strlen(nodeName));
+            name = new char[strlen(nodeName) + 1];  // Allocate memory for name
+            strncpy(name, nodeName, strlen(nodeName) + 1);
         }
         else if(_type == tokenVar){
-            name = new char[strlen(nodeName) - 1];  // Allocate memory for name
+            name = new char[strlen(nodeName)];  // Allocate memory for name
             strncpy(name, nodeName, strlen(nodeName) - 1);
+            name[strlen(nodeName) - 1] = '\0';
         }
 
         // printf("NAME: %s\n", name);

@@ -152,6 +152,7 @@
 			return root->numValue;
 
 		else if(root->token == tokenVar && !mem.count(root->name)){
+			printf("VAR: %s|\n", root->name);
 			yyerror("Undefined Variable");
 			exit(0);
 		}
@@ -259,7 +260,10 @@ Glist:	Gid { /* printf("%s\n", $1->name); */ $$ = $1; }
 	|	func ',' Glist { /* $$ = new TreeNode("ARGS", tokenKey, $1, $3); */ }
 	;
 
-Gid	:	VAR	{ /* printf("VARYACC: %s\n", $1); */ $$ = new TreeNode($1, tokenVar); }
+Gid	:	VAR	{ /* printf("VARYACC: %s\n", $1); */ 
+		$$ = new TreeNode($1, tokenVar); 
+		mem[$$->name] = 0;
+	}
 	|	Gid '[' NUM ']'	{ /* $$ = new TreeNode( "Index tokenOp,", new TreeNode($3)); */ }
 	;
 	
@@ -385,8 +389,8 @@ assign_stmt:
 		$$ = new TreeNode("=", tokenOp, $1, $3);
 		print_tree($$);
 		
-		if(!mem.count($1->name)) 
-			mem[$1->name] = 0;
+		// if(!mem.count($1->name)) 
+		// 	mem[$1->name] = 0;
 		mem[$1->name] = evaluate_expr($3);
 	}
 	;
@@ -455,23 +459,22 @@ var_expr:
 	;
 %%
 void yyerror(const char* s){
-	printf("Error is here\n");
+	/* printf("Error is here\n"); */
    	fprintf (stderr, "%s\n", s);
 }
 
 
 int main(int argc, char* argv[]){
-	/* FILE *file = fopen(argv[1], "r");
+	FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
         return 1;
     }
 
-	yyin = file; */
+	yyin = file;
 
-	/* for(int i = 0; i < n; i++) */
 	yyparse();
 	
-	/* fclose(file); */
+	fclose(file);
 	return 0;
 }
