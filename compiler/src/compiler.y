@@ -143,6 +143,7 @@
 
 %union{
 	int val;
+	char* name;
 	TreeNode* node;
 }
 

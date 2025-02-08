@@ -19,6 +19,8 @@
     #include "y.tab.h"
     int Lineno;
     int wflag;
+
+    extern YYSTYPE yylval;
     extern void yyerror(const char* s);
 %}
 
@@ -59,8 +61,14 @@ NOT				{ return LOGICAL_NOT; }
 true			{ return T; }	
 false			{ return F; }
 
-{digit}+		{ return NUM; } /* no float support */
-{letter}({letter}|{digit})*	{ return VAR; }
+{digit}+		{ 
+        yylval.val = atof(yytext);
+        return NUM; 
+    } /* no float support */
+{letter}({letter}|{digit})*	{ 
+        yylval.name = yytext;
+        return VAR; 
+    }
 [-+*/=()><;,\{\}\[\]\%]     { return yytext[0]; }
 			
 ["]             { return yytext[0]; }
