@@ -207,7 +207,7 @@ ret_type:	T_INT		{
 	}
 	;
 	
-Glist:	Gid { $$ = new TreeNode("VAR", tokenVar); }
+Glist:	Gid { $$ = $1; }
 	| 	func { /* $$ = $1; */ }
 	|	Gid ',' Glist  { 
 		// printf("Using\n");
@@ -217,7 +217,7 @@ Glist:	Gid { $$ = new TreeNode("VAR", tokenVar); }
 	|	func ',' Glist { /* $$ = new TreeNode("ARGS", tokenKey, $1, $3); */ }
 	;
 
-Gid	:	VAR	{ printf("VAR: %d\n", $1); $$ = new TreeNode($1, tokenVar); }
+Gid	:	VAR	{ printf("VAR: %s\n", $1); $$ = new TreeNode($1, tokenVar); }
 	|	Gid '[' NUM ']'	{ /* $$ = new TreeNode( "Index tokenOp,", new TreeNode($3)); */ }
 	;
 	
