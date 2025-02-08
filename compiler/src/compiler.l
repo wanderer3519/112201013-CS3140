@@ -65,15 +65,20 @@ false			{ return F; }
         yylval.val = atof(yytext);
         return NUM; 
     } /* no float support */
+
+[\-\+*/=,;()><\{\}\[\]\%]     { return yytext[0]; }
+
 {letter}({letter}|{digit})*	{ 
+        // printf("VARLEX: %s\n", yytext);
         yylval.name = yytext;
+        // printf("VARLEX: %s\n", yylval.name);
         return VAR; 
     }
-[-+*/=()><;,\{\}\[\]\%]     { return yytext[0]; }
+
 			
 ["]             { return yytext[0]; }
-
-[ \t\n]+			;
+\n              ;
+[ \t]			;
 .				{ yyerror("Invalid character 234"); }		
 	
 \/\/(.*) ; /* Regular expression for single line comment */   

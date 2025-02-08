@@ -143,8 +143,9 @@
 
 %union{
 	int val;
-	char* name;
+	const char* name;
 	TreeNode* node;
+	char endop;
 }
 
 
@@ -165,6 +166,7 @@
 %token WHILE DO ENDWHILE FOR 
 %token <val> T F 
 %token MAIN RETURN
+
 
 
 %left '<' '>'
@@ -196,7 +198,7 @@ Gdecl_list:  { $$ = nullptr; }
 	gid: var2
 	gid: var3
 */
-Gdecl 	:	ret_type Glist ';' { /* $$ = new TreeNode("Key", tokenKey, $1, $2); */ 
+Gdecl 	:	ret_type Glist  ';' { /* $$ = new TreeNode("Key", tokenKey, $1, $2); */ 
 		$$ = $1;
 		$$->right = $2;
 	}
@@ -208,26 +210,22 @@ ret_type:	T_INT		{
 	}
 	;
 	
-Glist:	Gid { printf("%s ", $1->name); $$ = $1; }
+Glist:	Gid { /* printf("%s\n", $1->name); */ $$ = $1; }
 	| 	func { /* $$ = $1; */ }
 	|	Gid ',' Glist  { 
-			// printf("GID: %s\n", $1);
-			// $$ = $3;
-			// $$->right = $1;
-			// $$ = new TreeNode()
-			// do a LL insert
-			// $$ = $3;
-			// TreeNode* node = $3;
-			// while(node->right) node = node->right;
-			// node->right = $1;
 			$$ = $1;
+			// TreeNode* tail = $3;
+			
+			// while(tail->right) 
+			// 	tail = tail->right;
+			// tail->right = $1;
+			
 			$$->right = $3;
-
 		}
 	|	func ',' Glist { /* $$ = new TreeNode("ARGS", tokenKey, $1, $3); */ }
 	;
 
-Gid	:	VAR	{ printf("VAR: %s\n", $1); $$ = new TreeNode($1, tokenVar); }
+Gid	:	VAR	{ /* printf("VARYACC: %s\n", $1); */ $$ = new TreeNode($1, tokenVar); }
 	|	Gid '[' NUM ']'	{ /* $$ = new TreeNode( "Index tokenOp,", new TreeNode($3)); */ }
 	;
 	
@@ -242,7 +240,7 @@ Gid	:	VAR	{ printf("VAR: %s\n", $1); $$ = new TreeNode($1, tokenVar); }
 	var_list: b
 */
 
-func:	VAR '(' arg_list ')' { printf("VAR: %s\n", $1); $$ = new TreeNode($1, tokenVar,  new TreeNode($1, tokenVar), $3); }
+func:	VAR '(' arg_list ')' { /* printf("VAR: %s\n", $1); */ $$ = new TreeNode($1, tokenVar,  new TreeNode($1, tokenVar), $3); }
 	;
 		
 arg_list: { $$ = nullptr; }	
@@ -286,7 +284,7 @@ FargList:
 		arg_list	{ 					}
 	;
 ret_stmt:	
-		RETURN expr ';'	{ 					}
+		RETURN expr  ';'	{ 					}
 	;
 		
 MainBlock: 	
@@ -305,7 +303,7 @@ Ldecl_list:
 	;
 
 Ldecl:	
-	type Lid_list ';'		
+	type Lid_list  ';'		
 	;
 
 type:	
@@ -314,7 +312,7 @@ type:
 
 Lid_list:	
 	Lid
-	|	Lid ',' Lid_list';'
+	|	Lid ',' Lid_list ';'
 	;
 	
 Lid	:	
@@ -326,15 +324,15 @@ Lid	:
 stmt_list:	
 		/* NULL */		{ /* maybe display the symbol table here */ }
 	|	statement stmt_list	{ }
-	|	error ';' 		{  }
+	|	error  ';' 		{  }
 	;
 
 statement:	
-	assign_stmt  ';'		{ $$ = $1; }
-	|	read_stmt ';'		{ $$ = $1; }
-	|	write_stmt ';'		{ $$ = $1; }
+	assign_stmt   ';'		{ $$ = $1; }
+	|	read_stmt  ';'		{ $$ = $1; }
+	|	write_stmt  ';'		{ $$ = $1; }
 	|	cond_stmt 			{ }
-	|	func_stmt ';'		{ }
+	|	func_stmt  ';'		{ }
 	;
 
 read_stmt:	
@@ -358,14 +356,14 @@ assign_stmt:
 cond_stmt:	
 	IF expr THEN stmt_list ENDIF 	{ 						}
 	|	IF expr THEN stmt_list ELSE stmt_list ENDIF 	{ 						}
-    |   FOR '(' assign_stmt  ';'  expr ';'  assign_stmt ')' '{' stmt_list '}'   {                                                 }
+    |   FOR '(' assign_stmt   ';'  expr  ';'  assign_stmt ')' '{' stmt_list '}'   {                                                 }
 	;
 
 func_stmt:	
 	func_call 		{ $$ = $1; print_tree($$); }
 	;
 	
-func_call:	VAR '(' param_list ')'	{ printf("VAR: %s\n", $1); $$ = new TreeNode("CALL", tokenKey, new TreeNode($1, tokenVar), $3); }
+func_call:	VAR '(' param_list ')'	{ /* printf("VAR: %s\n", $1); */ $$ = new TreeNode("CALL", tokenKey, new TreeNode($1, tokenVar), $3); }
 	;
 	
 param_list:	{ $$ = nullptr; }
@@ -409,12 +407,12 @@ expr:
 	;
 
 str_expr:
-    VAR { printf("VAR: %s\n", $1); $$ = new TreeNode($1, tokenVar); }  // Single variable node
-  | str_expr VAR { printf("VAR: %s\n", $1); $$ = new TreeNode("STRING", tokenVar, $1, new TreeNode($2, tokenVar)); }
+    VAR { /* printf("VAR: %s\n", $1); */ $$ = new TreeNode($1, tokenVar); }  // Single variable node
+  | str_expr VAR { /* printf("VAR: %s\n", $1); */ $$ = new TreeNode("STRING", tokenVar, $1, new TreeNode($2, tokenVar)); }
   ;
 
 var_expr:	
-	VAR	{ printf("VAR: %s\n", $1); $$ = new TreeNode($1, tokenVar); }
+	VAR	{ /* printf("VAR: %s\n", $1); */ $$ = new TreeNode($1, tokenVar); }
 	|	var_expr '[' expr ']'	{ /* $$ = new TreeNode('V', $1, $3); */ }
 	;
 %%
