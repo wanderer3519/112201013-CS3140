@@ -150,7 +150,7 @@
 /* %type <node> Gdecl_sec Gdecl_list */
 %type <node> arg_list1 arg_list arg func ret_type 
 %type <node> Gid expr var_expr func_call param_list para param_list1 str_expr assign_stmt Gdecl_list
-%type <node> Gdecl Glist
+%type <node> Gdecl Glist read_stmt write_stmt statement stmt_list
 
 %token BEG END
 %token <val> T_INT T_BOOL
@@ -184,7 +184,7 @@ Gdecl_sec:	DECL Gdecl_list ENDDECL {
 	;
 	
 Gdecl_list:  { $$ = nullptr; }
-	| 	Gdecl Gdecl_list { $$ = new TreeNode("DECL", tokenKey, $1, $2); }
+	| 	Gdecl Gdecl_list { $$ = new TreeNode("DECL", tokenKey, $2, $1); }
 	;
 	
 /* gdecl: integer var1, var2, var3;
@@ -314,32 +314,33 @@ Lid	:
 /* needed for assignment 2 */
 stmt_list:	
 		/* NULL */		{ /* maybe display the symbol table here */ }
-	|	statement stmt_list	{						}
+	|	statement stmt_list	{ }
 	|	error ';' 		{  }
 	;
 
 statement:	
-	assign_stmt  ';'		{ 							 }
-	|	read_stmt ';'		{ }
-	|	write_stmt ';'		{ }
-	|	cond_stmt 		{ }
+	assign_stmt  ';'		{ $$ = $1; }
+	|	read_stmt ';'		{ $$ = $1; }
+	|	write_stmt ';'		{ $$ = $1; }
+	|	cond_stmt 			{ }
 	|	func_stmt ';'		{ }
 	;
 
 read_stmt:	
-	READ '(' var_expr ')' {						 }
+	READ '(' var_expr ')' { $$ = new TreeNode("READ", tokenKey, nullptr, $3); print_tree($$); }
 	;
 
 write_stmt:	
-	WRITE '(' expr ')' 	{  }
-	|	WRITE '(''"' str_expr '"'')'      { }
+	WRITE '(' expr ')' 					{ $$ = new TreeNode("WRITE", tokenKey, nullptr, $3); print_tree($$); }
+	|	WRITE '(''"' str_expr '"'')'    { $$ = new TreeNode("WRITE", tokenKey, nullptr, $4); print_tree($$); }
 	;
 
 /* use this */
 assign_stmt:	
 	var_expr '=' expr 	{ 
-		printf("Control Reached :)\n"); 
+		/* printf("Control Reached :)\n");  */
 		$$ = new TreeNode("=", tokenOp, $1, $3);
+		print_tree($$);
 	}
 	;
 
@@ -353,7 +354,7 @@ func_stmt:
 	func_call 		{ 						}
 	;
 	
-func_call:	VAR '(' param_list ')'	{ $$ = new TreeNode('C', tokenKey, new TreeNode($1, tokenVar), $3); }
+func_call:	VAR '(' param_list ')'	{ $$ = new TreeNode("CALL", tokenKey, new TreeNode($1, tokenVar), $3); }
 	;
 	
 param_list:				
@@ -390,7 +391,7 @@ expr:
 	|	LOGICAL_NOT expr				{ $$ = new TreeNode( "!", tokenOp, nullptr, $2);	}
 	|	expr LOGICAL_AND expr			{ $$ = new TreeNode( "&&", tokenOp, $1, $3);		}
 	|	expr LOGICAL_OR expr			{ $$ = new TreeNode( "||", tokenOp, $1, $3);		}
-	|	func_call		{ $$ = $1; }
+	|	func_call		{ /* $$ = $1; */ }
 	;
 
 str_expr:
