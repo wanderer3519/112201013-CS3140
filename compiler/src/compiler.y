@@ -49,6 +49,96 @@
 		preorder(root->right);
 	}
 
+	/*	Helper function to print one level of a binary tree */
+	void print_level(TreeNode* root, int t_level, int p_level, int height) {
+	/*
+		Inputs:
+			1.	Top level node t
+			2.	Height of the top level node (t) in the whole binary tree
+			3.	Level of the binary tree to be printed
+			4.	Height of the whole binary tree
+	*/
+		if(t_level > p_level) {
+			fprintf(stderr, "Error in print_level\n");
+			return;
+			}
+		if(t_level < p_level) {
+			if (root != NULL)
+				print_level(root->left, t_level+1, p_level, height);
+			else
+				print_level(NULL, t_level+1, p_level, height);
+
+			if (root != NULL)
+				print_level(root->right, t_level+1, p_level, height);
+			else
+				print_level(NULL, t_level+1, p_level, height);
+			return;
+		}
+
+		// t_level == p_level
+		int padding = 1;	// for alignment
+		for (int i = p_level; i < height-1; i++)
+			padding = padding * 2 + 1;
+
+		// To prefix some space and a line 
+		for (int i = 0; i < (padding+1)/2; i++)
+			printf("  ");
+		for (int i = (padding+1)/2; i < padding; i++)
+			printf("__");
+
+		if (root != NULL){
+			switch(root->type){
+				case tokenVar:
+				printf("VAR ");
+				break;
+
+				case tokenOp:
+				printf("%4s ", root->name);
+				break;
+
+				case tokenVal:
+				printf("%4d ", root->numValue);
+				break;
+
+				case tokenKey:
+				printf("%4s ", root->name);
+				break;
+			}
+		}
+		else
+			printf("()");	
+
+		// To suffix a line and some space
+		for (int i = (padding+1)/2; i < padding; i++)
+			printf("__");
+		for (int i = 0; i < (padding+1)/2; i++)
+			printf("  ");
+
+		printf("  ");
+		return;
+	}
+
+	int height(TreeNode* root){
+		if(!root) return 0;
+
+		int left = height(root->left);
+		int right = height(root->right);
+
+		return 1 + max(left, right);
+	}
+
+	/*	Helper function to print the binary tree in a tree-like way. */
+	void print_tree(TreeNode* t) {
+		int h = height(t);
+		for(int l = 0; l < h; l++) {
+			print_level(t, 0, l, h);
+			printf("\n");
+			}
+		return;
+	}
+
+	
+
 %}
 
 %union{
@@ -88,13 +178,13 @@ Prog:	Gdecl_sec Fdef_sec MainBlock
 	;
 	
 Gdecl_sec:	DECL Gdecl_list ENDDECL { 
-		printf("You are right\n");
-		preorder($2); // here
+		// printf("You are right\n");
+		print_tree($2); // here
  	}
 	;
 	
 Gdecl_list:  { $$ = nullptr; }
-	| 	Gdecl Gdecl_list { $$ = new TreeNode("LIST", tokenKey, $1, $2); }
+	| 	Gdecl Gdecl_list { $$ = new TreeNode("DECL", tokenKey, $1, $2); }
 	;
 	
 /* gdecl: integer var1, var2, var3;
@@ -104,16 +194,26 @@ Gdecl_list:  { $$ = nullptr; }
 	gid: var2
 	gid: var3
 */
-Gdecl 	:	ret_type Glist ';' { $$ = new TreeNode("Key", tokenKey, $1, $2); }
+Gdecl 	:	ret_type Glist ';' { /* $$ = new TreeNode("Key", tokenKey, $1, $2); */ 
+		$$ = $2;
+		$$->left = $1;
+	}
 	;
 	
-ret_type:	T_INT		{ $$ = new TreeNode($1, tokenKey); }
+ret_type:	T_INT		{ 
+		/* printf("%d\n", $1); */
+		$$ = new TreeNode("INT", tokenKey); 
+	}
 	;
 	
-Glist:	Gid { $$ = $1; }
-	| 	func { $$ = $1; }
-	|	Gid ',' Glist  { $$ = new TreeNode("ARGS", tokenKey, $1, $3); }
-	|	func ',' Glist { $$ = new TreeNode("ARGS", tokenKey, $1, $3); }
+Glist:	Gid { $$ = new TreeNode("VAR", tokenVar); }
+	| 	func { /* $$ = $1; */ }
+	|	Gid ',' Glist  { 
+		// printf("Using\n");
+			$$ = $1;
+			$$->right = $3;
+		}
+	|	func ',' Glist { /* $$ = new TreeNode("ARGS", tokenKey, $1, $3); */ }
 	;
 
 Gid	:	VAR	{ $$ = new TreeNode($1, tokenVar); }
