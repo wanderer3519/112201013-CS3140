@@ -195,8 +195,8 @@ Gdecl_list:  { $$ = nullptr; }
 	gid: var3
 */
 Gdecl 	:	ret_type Glist ';' { /* $$ = new TreeNode("Key", tokenKey, $1, $2); */ 
-		$$ = $2;
-		$$->left = $1;
+		$$ = $1;
+		$$->right = $2;
 	}
 	;
 	
