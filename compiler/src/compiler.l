@@ -39,7 +39,7 @@ read			{ return READ; }
 write			{ return WRITE; }	
 integer			{ return T_INT; }	
 boolean			{ return T_BOOL; }
-decl			{ return DECL; }
+begindecl			{ return DECL; }
 enddecl			{ return ENDDECL; }
 
 if				{ return IF; }
