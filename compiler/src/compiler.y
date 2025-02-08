@@ -37,7 +37,11 @@
 			break;
 
 			case tokenVal:
-			printf("%s ", root->numValue);
+			printf("%d ", root->numValue);
+			break;
+
+			case tokenKey:
+			printf("%s ", root->name);
 			break;
 		}
 
@@ -54,7 +58,9 @@
 
 
 /* %type <node> Gdecl_sec Gdecl_list */
-%type <node> arg_list1 arg_list arg func ret_type Gid expr var_expr func_call param_list para param_list1 str_expr assign_stmt Gdecl_list
+%type <node> arg_list1 arg_list arg func ret_type 
+%type <node> Gid expr var_expr func_call param_list para param_list1 str_expr assign_stmt Gdecl_list
+%type <node> Gdecl Glist
 
 %token BEG END
 %token <val> T_INT T_BOOL
@@ -83,12 +89,12 @@ Prog:	Gdecl_sec Fdef_sec MainBlock
 	
 Gdecl_sec:	DECL Gdecl_list ENDDECL { 
 		printf("You are right\n");
-		// preorder($2); // here
+		preorder($2); // here
  	}
 	;
 	
-Gdecl_list: 
-	| 	Gdecl Gdecl_list
+Gdecl_list:  { $$ = nullptr; }
+	| 	Gdecl Gdecl_list { $$ = new TreeNode("LIST", tokenKey, $1, $2); }
 	;
 	
 /* gdecl: integer var1, var2, var3;
@@ -98,16 +104,16 @@ Gdecl_list:
 	gid: var2
 	gid: var3
 */
-Gdecl 	:	ret_type Glist ';'
+Gdecl 	:	ret_type Glist ';' { $$ = new TreeNode("Key", tokenKey, $1, $2); }
 	;
 	
 ret_type:	T_INT		{ $$ = new TreeNode($1, tokenKey); }
 	;
 	
-Glist:	Gid
-	| 	func 
-	|	Gid ',' Glist 
-	|	func ',' Glist
+Glist:	Gid { $$ = $1; }
+	| 	func { $$ = $1; }
+	|	Gid ',' Glist  { $$ = new TreeNode("ARGS", tokenKey, $1, $3); }
+	|	func ',' Glist { $$ = new TreeNode("ARGS", tokenKey, $1, $3); }
 	;
 
 Gid	:	VAR	{ $$ = new TreeNode($1, tokenVar); }
@@ -128,7 +134,7 @@ Gid	:	VAR	{ $$ = new TreeNode($1, tokenVar); }
 func:	VAR '(' arg_list ')' { $$ = new TreeNode($1, tokenVar,  new TreeNode($1, tokenVar), $3); }
 	;
 		
-arg_list:	
+arg_list: { $$ = nullptr; }	
 	|	arg_list1 { $$ = $1; }
 	;
 	
