@@ -24,7 +24,7 @@
     extern void yyerror(const char* s);
 %}
 
-%option noyywrap
+
 digit	[0-9]
 letter	[a-zA-Z]
 start \/\* 
@@ -83,9 +83,11 @@ false			{ return F; }
 	
 \/\/(.*) ; /* Regular expression for single line comment */   
 
-{start}.*{end} ; /* Regular expression for multi line comment */    
+{start}.*{end} ; /* Regular expression for multi line comment */  
+  
 %%
 
-/* int yywrap(){
+
+int yywrap(){
     return 1;
-} */
+}

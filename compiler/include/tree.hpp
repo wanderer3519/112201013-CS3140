@@ -109,7 +109,7 @@ struct TreeNode {
             strncpy(name, nodeName, strlen(nodeName) - 1);
         }
 
-        printf("NAME: %s\n", name);
+        // printf("NAME: %s\n", name);
         // name = "Nothing";
         left = _left;
         right = _right;

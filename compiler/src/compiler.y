@@ -21,6 +21,7 @@
 
 	int yylex();
 	void yyerror(const char* s);
+	extern FILE* yyin;
     // int i;
 	// Symbol* sym[1024];
 
@@ -421,14 +422,19 @@ void yyerror(const char* s){
    	fprintf (stderr, "%s\n", s);
 }
 
+
 int main(int argc, char* argv[]){
-	/* FILE *file = fopen(argv[1], "r");
+	FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
         return 1;
     }
 
-	yyin = file; */
+	yyin = file;
+
+	/* for(int i = 0; i < n; i++) */
 	yyparse();
-	/* fclose(file); */
+	
+	fclose(file);
+	return 0;
 }
