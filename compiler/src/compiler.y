@@ -18,6 +18,9 @@
 %{	
 	#include "tree.hpp"
 	#include <stdio.h>
+	#include <unordered_map>
+
+	std::unordered_map<const char*, int>mem;
 
 	int yylex();
 	void yyerror(const char* s);
@@ -28,7 +31,7 @@
 	void preorder(TreeNode* root){
 		if(!root) return;
 
-		switch(root->type){
+		switch(root->token){
 			case tokenVar:
 			printf("VAR ");
 			break;
@@ -88,7 +91,7 @@
 			printf("__");
 
 		if (root != NULL){
-			switch(root->type){
+			switch(root->token){
 				case tokenVar:
 				printf("%s ", root->name);
 				break;
@@ -139,7 +142,43 @@
 	}
 
 	
+	int evaluate_expr(TreeNode* root){
+		// if(root->token != tokenOp && root->token != tokenNum)
+		// 	return 0;
+		
+		if(!root) return 0;
 
+		if(root->token == tokenVal)
+			return root->numValue;
+
+		else if(root->token == tokenVar && !mem.count(root->name)){
+			yyerror("Undefined Variable");
+			exit(0);
+		}
+
+		else if(root->token == tokenVar){
+			return mem[root->name];
+		}
+
+		int left_eval = evaluate_expr(root->left);
+		int right_eval = evaluate_expr(root->right);
+
+		int ans = 0;
+		switch(root->name[0]){
+			case '+': ans = left_eval + right_eval; break;
+			case '-': ans = left_eval - right_eval; break;
+			case '*': ans = left_eval * right_eval; break;
+			case '/':
+				if(right_eval == 0){
+					yyerror("Division by zero");
+					exit(0);
+				} 
+				ans = left_eval / right_eval;
+			break;
+		}
+
+		return ans;
+	}
 %}
 
 %union{
@@ -215,12 +254,6 @@ Glist:	Gid { /* printf("%s\n", $1->name); */ $$ = $1; }
 	| 	func { /* $$ = $1; */ }
 	|	Gid ',' Glist  { 
 			$$ = $1;
-			// TreeNode* tail = $3;
-			
-			// while(tail->right) 
-			// 	tail = tail->right;
-			// tail->right = $1;
-			
 			$$->right = $3;
 		}
 	|	func ',' Glist { /* $$ = new TreeNode("ARGS", tokenKey, $1, $3); */ }
@@ -351,6 +384,10 @@ assign_stmt:
 		/* printf("Control Reached :)\n");  */
 		$$ = new TreeNode("=", tokenOp, $1, $3);
 		print_tree($$);
+		
+		if(!mem.count($1->name)) 
+			mem[$1->name] = 0;
+		mem[$1->name] = evaluate_expr($3);
 	}
 	;
 
@@ -424,17 +461,17 @@ void yyerror(const char* s){
 
 
 int main(int argc, char* argv[]){
-	FILE *file = fopen(argv[1], "r");
+	/* FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
         return 1;
     }
 
-	yyin = file;
+	yyin = file; */
 
 	/* for(int i = 0; i < n; i++) */
 	yyparse();
 	
-	fclose(file);
+	/* fclose(file); */
 	return 0;
 }

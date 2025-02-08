@@ -22,6 +22,7 @@
 
     extern YYSTYPE yylval;
     extern void yyerror(const char* s);
+    extern std::unordered_map<const char*, int> mem;
 %}
 
 
@@ -89,5 +90,11 @@ false			{ return F; }
 
 
 int yywrap(){
+    /* printf("DONE PARSING"); */
+    for(auto p: mem){
+        const char* key = p.first;
+        int val = p.second;
+        printf("mem[%s] = %d\n", key, val);
+    }
     return 1;
 }

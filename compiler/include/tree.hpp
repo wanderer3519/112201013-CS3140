@@ -16,7 +16,7 @@ enum NodeType { tokenOp, tokenKey, tokenVar, tokenVal };
 //     int id;
 //     std::string var_name;
 //     std::string var_type;
-//     std::shared_ptr<void> value; // Can be used to hold different types (generic type storage)
+//     std::shared_ptr<void> value; // Can be used to hold different types (generic token storage)
 
 //     Symbol(int id, std::string var_name, std::string var_type, std::shared_ptr<void> value)
 //         : id(id), var_name(var_name), var_type(var_type), value(value) {}
@@ -60,7 +60,7 @@ enum NodeType { tokenOp, tokenKey, tokenVar, tokenVal };
 //             } else if (sym.var_type == "float") {
 //                 std::cout << *std::static_pointer_cast<float>(sym.value) << std::endl;
 //             } else {
-//                 std::cout << "Unknown type\n";
+//                 std::cout << "Unknown token\n";
 //             }
 //         }
 //     }
@@ -90,7 +90,7 @@ struct TreeNode {
     
 
     TreeNode* right;
-    NodeType type;
+    NodeType token;
     
     union {
         char* name;     // For operators and keywords
@@ -101,11 +101,11 @@ struct TreeNode {
     // Constructor for operator or keyword nodes or variable
     TreeNode(const char* nodeName, NodeType _type, TreeNode* _left = nullptr, TreeNode* _right = nullptr){
         if (_type == tokenOp || _type == tokenKey) {
-            name = new char[strlen(nodeName) + 1];  // Allocate memory for name
+            name = new char[strlen(nodeName)];  // Allocate memory for name
             strncpy(name, nodeName, strlen(nodeName));
         }
         else if(_type == tokenVar){
-            name = new char[strlen(nodeName)];  // Allocate memory for name
+            name = new char[strlen(nodeName) - 1];  // Allocate memory for name
             strncpy(name, nodeName, strlen(nodeName) - 1);
         }
 
@@ -113,7 +113,7 @@ struct TreeNode {
         // name = "Nothing";
         left = _left;
         right = _right;
-        type = _type;
+        token = _type;
     }
 
     // Constructor for number nodes
@@ -121,12 +121,12 @@ struct TreeNode {
         left = _left;
         right = _right;
         numValue = _value;
-        type = _type;
+        token = _type;
     }
 
     // Constructor for variable nodes
     // TreeNode(VarClass* varPtr, TreeNode* left = nullptr, TreeNode* right = nullptr)
-    //     : left(left), right(right), type(tokenVar) {
+    //     : left(left), right(right), token(tokenVar) {
     //     data.var = varPtr;
     // }
 };
