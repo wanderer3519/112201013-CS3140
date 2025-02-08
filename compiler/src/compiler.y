@@ -150,7 +150,7 @@
 /* %type <node> Gdecl_sec Gdecl_list */
 %type <node> arg_list1 arg_list arg func ret_type 
 %type <node> Gid expr var_expr func_call param_list para param_list1 str_expr assign_stmt Gdecl_list
-%type <node> Gdecl Glist read_stmt write_stmt statement stmt_list
+%type <node> Gdecl Glist read_stmt write_stmt statement stmt_list func_stmt
 
 %token BEG END
 %token <val> T_INT T_BOOL
@@ -351,19 +351,22 @@ cond_stmt:
 	;
 
 func_stmt:	
-	func_call 		{ 						}
+	func_call 		{ $$ = $1; print_tree($$); }
 	;
 	
 func_call:	VAR '(' param_list ')'	{ $$ = new TreeNode("CALL", tokenKey, new TreeNode($1, tokenVar), $3); }
 	;
 	
-param_list:				
-	|	param_list1		
+param_list:	{ $$ = nullptr; }
+	|	param_list1	{ $$ = $1; }
 	;
 	
 param_list1:	
-	para			
-	|	para ',' param_list1	
+	para { $$ = $1; }
+	|	para ',' param_list1 { 
+		$$ = $1;
+		$$->right = $3; 
+	}	
 	;
 
 para:	
