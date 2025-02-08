@@ -216,7 +216,7 @@ Glist:	Gid { $$ = new TreeNode("VAR", tokenVar); }
 	|	func ',' Glist { /* $$ = new TreeNode("ARGS", tokenKey, $1, $3); */ }
 	;
 
-Gid	:	VAR	{ $$ = new TreeNode($1, tokenVar); }
+Gid	:	VAR	{ printf("VAR: %d\n", $1); $$ = new TreeNode($1, tokenVar); }
 	|	Gid '[' NUM ']'	{ /* $$ = new TreeNode( "Index tokenOp,", new TreeNode($3)); */ }
 	;
 	
@@ -231,7 +231,7 @@ Gid	:	VAR	{ $$ = new TreeNode($1, tokenVar); }
 	var_list: b
 */
 
-func:	VAR '(' arg_list ')' { $$ = new TreeNode($1, tokenVar,  new TreeNode($1, tokenVar), $3); }
+func:	VAR '(' arg_list ')' { printf("VAR: %d\n", $1); $$ = new TreeNode($1, tokenVar,  new TreeNode($1, tokenVar), $3); }
 	;
 		
 arg_list: { $$ = nullptr; }	
@@ -354,7 +354,7 @@ func_stmt:
 	func_call 		{ $$ = $1; print_tree($$); }
 	;
 	
-func_call:	VAR '(' param_list ')'	{ $$ = new TreeNode("CALL", tokenKey, new TreeNode($1, tokenVar), $3); }
+func_call:	VAR '(' param_list ')'	{ printf("VAR: %d\n", $1); $$ = new TreeNode("CALL", tokenKey, new TreeNode($1, tokenVar), $3); }
 	;
 	
 param_list:	{ $$ = nullptr; }
@@ -398,12 +398,12 @@ expr:
 	;
 
 str_expr:
-    VAR { $$ = new TreeNode($1, tokenVar); }  // Single variable node
-  | str_expr VAR { $$ = new TreeNode("Concat", tokenVar, $1, new TreeNode($2, tokenVar)); }
+    VAR { printf("VAR: %d\n", $1); $$ = new TreeNode($1, tokenVar); }  // Single variable node
+  | str_expr VAR { printf("VAR: %d\n", $1); $$ = new TreeNode("Concat", tokenVar, $1, new TreeNode($2, tokenVar)); }
   ;
 
 var_expr:	
-	VAR	{ $$ = new TreeNode($1, tokenVar); }
+	VAR	{ printf("VAR: %d\n", $1); $$ = new TreeNode($1, tokenVar); }
 	|	var_expr '[' expr ']'	{ /* $$ = new TreeNode('V', $1, $3); */ }
 	;
 %%
