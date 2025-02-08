@@ -100,7 +100,7 @@ struct TreeNode {
 
     // Constructor for operator or keyword nodes or variable
     TreeNode(const char* nodeName, NodeType _type, TreeNode* _left = nullptr, TreeNode* _right = nullptr){
-        if (_type == tokenOp || _type == tokenKey) {
+        if (_type == tokenOp || _type == tokenKey || _type == tokenVar) {
             name = new char[strlen(nodeName) + 1];  // Allocate memory for name
             strcpy(name, nodeName);
         }

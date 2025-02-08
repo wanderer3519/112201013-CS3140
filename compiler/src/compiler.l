@@ -72,8 +72,8 @@ false			{ return F; }
 [-+*/=()><;,\{\}\[\]\%]     { return yytext[0]; }
 			
 ["]             { return yytext[0]; }
-"\\n"           ;
-[ \t]			;
+
+[ \t\n]+			;
 .				{ yyerror("Invalid character 234"); }		
 	
 \/\/(.*) ; /* Regular expression for single line comment */   
