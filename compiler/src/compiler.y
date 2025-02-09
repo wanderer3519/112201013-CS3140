@@ -201,12 +201,12 @@ Gdecl_sec:	DECL Gdecl_list ENDDECL {
 	
 Gdecl_list:  { $$ = nullptr; }
 	| 	Gdecl Gdecl_list { 
-		if(!$2)
+		// if(!$2)
 			$$ = new TreeNode("DECL", tokenKey, $1, $2); 
-		else{
-			$$ = $2;
-			$$->right = $1;
-		}
+		// else{
+		// 	$$ = $2;
+		// 	$$->right = $1;
+		// }
 	}
 	;
 	
