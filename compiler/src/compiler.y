@@ -26,32 +26,6 @@
 	void yyerror(const char* s);
 	extern FILE* yyin;
     // int i;
-	// Symbol* sym[1024];
-
-	void preorder(TreeNode* root){
-		if(!root) return;
-
-		switch(root->token){
-			case tokenVar:
-			printf("VAR ");
-			break;
-
-			case tokenOp:
-			printf("%s ", root->name);
-			break;
-
-			case tokenVal:
-			printf("%d ", root->numValue);
-			break;
-
-			case tokenKey:
-			printf("%s ", root->name);
-			break;
-		}
-
-		preorder(root->left);
-		preorder(root->right);
-	}
 
 	/*	Helper function to print one level of a binary tree */
 	void print_level(TreeNode* root, int t_level, int p_level, int height) {
@@ -93,19 +67,19 @@
 		if (root != NULL){
 			switch(root->token){
 				case tokenVar:
-				printf("%s ", root->name);
+				printf("%s", root->name);
 				break;
 
 				case tokenOp:
-				printf("%s ", root->name);
+				printf("%s", root->name);
 				break;
 
 				case tokenVal:
-				printf("%d ", root->numValue);
+				printf("%d", root->numValue);
 				break;
 
 				case tokenKey:
-				printf("%s ", root->name);
+				printf("%s", root->name);
 				break;
 			}
 		}
