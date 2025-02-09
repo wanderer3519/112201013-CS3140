@@ -192,7 +192,7 @@
 
 Prog:	Gdecl_sec Fdef_sec MainBlock
 	;
-	
+
 Gdecl_sec:	DECL Gdecl_list ENDDECL { 
 		// printf("You are right\n");
 		print_tree($2); // here
@@ -368,7 +368,7 @@ assign_stmt:
 		print_tree($$);
 		
 		if(!mem.count($1->name)){
-			yyerror("Undefined variable");
+			yyerror("Undefined Variable");
 			exit(0);
 		} 
 		// 	mem[$1->name] = 0;
@@ -430,7 +430,7 @@ expr:
 	;
 
 str_expr:
-    VAR { /* printf("VAR: %s\n", $1); */ $$ = new TreeNode($1, tokenVar); }  // Single variable node
+    VAR { /* printf("VAR: %s\n", $1); */ $$ = new TreeNode($1, tokenVar); }  // Single VAR node
   | str_expr VAR { /* printf("VAR: %s\n", $1); */ $$ = new TreeNode("STRING", tokenVar, $1, new TreeNode($2, tokenVar)); }
   ;
 
@@ -446,16 +446,16 @@ void yyerror(const char* s){
 
 
 int main(int argc, char* argv[]){
-	/* FILE *file = fopen(argv[1], "r");
+	FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
         return 1;
     }
 
-	yyin = file; */
+	yyin = file;
 
 	yyparse();
 	
-	/* fclose(file); */
+	fclose(file);
 	return 0;
 }

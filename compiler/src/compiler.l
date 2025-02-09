@@ -32,6 +32,7 @@ start \/\*
 end  \*\/ 
 
 %%
+[ \t\n]+			;
 main			{ return MAIN; }		
 return 			{ return RETURN; }
 begin			{ return BEG; }	
@@ -78,8 +79,7 @@ false			{ return F; }
 
 			
 ["]             { return yytext[0]; }
-\n              ;
-[ \t]			;
+
 .				{ yyerror("Invalid character 234"); }		
 	
 \/\/(.*) ; /* Regular expression for single line comment */   
