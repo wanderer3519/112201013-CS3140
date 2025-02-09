@@ -200,7 +200,14 @@ Gdecl_sec:	DECL Gdecl_list ENDDECL {
 	;
 	
 Gdecl_list:  { $$ = nullptr; }
-	| 	Gdecl Gdecl_list { $$ = new TreeNode("DECL", tokenKey, $2, $1); }
+	| 	Gdecl Gdecl_list { 
+		if(!$2)
+			$$ = new TreeNode("DECL", tokenKey, $1, $2); 
+		else{
+			$$ = $2;
+			$$->right = $1;
+		}
+	}
 	;
 	
 /* gdecl: integer var1, var2, var3;
@@ -360,7 +367,10 @@ assign_stmt:
 		$$ = new TreeNode("=", tokenOp, $1, $3);
 		print_tree($$);
 		
-		// if(!mem.count($1->name)) 
+		if(!mem.count($1->name)){
+			yyerror("Undefined variable");
+			exit(0);
+		} 
 		// 	mem[$1->name] = 0;
 		mem[$1->name] = evaluate_expr($3);
 	}
@@ -436,16 +446,16 @@ void yyerror(const char* s){
 
 
 int main(int argc, char* argv[]){
-	FILE *file = fopen(argv[1], "r");
+	/* FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
         return 1;
     }
 
-	yyin = file;
+	yyin = file; */
 
 	yyparse();
 	
-	fclose(file);
+	/* fclose(file); */
 	return 0;
 }
