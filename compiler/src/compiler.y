@@ -18,6 +18,7 @@
 %{	
 	#include "tree.hpp"
 	#include <stdio.h>
+	#include <iostream>
 	#include <stdlib.h>
 	#include <unordered_map>
 	#include <string>
@@ -363,7 +364,19 @@ read_stmt:
 	;
 
 write_stmt:	
-	WRITE '(' expr ')' 					{ $$ = new TreeNode("WRITE", tokenKey, nullptr, $3); print_tree($$); }
+	WRITE '(' expr ')' 					{ 
+		$$ = new TreeNode("WRITE", tokenKey, nullptr, $3); 
+		print_tree($$);
+		
+		// NodeType token = $3->token;
+		if($3->token == tokenVar){
+			std::cout << mem[$3->name] << '\n';
+		}
+		else {
+			int eval = evaluate_expr($3);
+			std::cout << eval << '\n';
+		}
+	 }
 	|	WRITE '(''"' str_expr '"'')'    { $$ = new TreeNode("WRITE", tokenKey, nullptr, $4); print_tree($$); }
 	;
 
@@ -371,7 +384,7 @@ write_stmt:
 assign_stmt:	
 	var_expr '=' expr 	{ 
 		/* printf("Control Reached :)\n");  */
-		printf("ASSIGN: %s|\n", $1->name);
+		// printf("ASSIGN: %s|\n", $1->name);
 		$$ = new TreeNode("=", tokenOp, $1, $3);
 		print_tree($$);
 		
