@@ -99,6 +99,29 @@
 		return;
 	}
 
+	void printAST(TreeNode* root){
+		if(!root) return;
+
+		switch(root->token){
+			case tokenVar:
+			printf("%s", root->name);
+			break;
+			
+			case tokenOp:
+			printf("%s", root->name);
+			break;
+			
+			case tokenVal:
+			printf("%d", root->numValue);
+			break;
+
+			case tokenKey:
+			printf("%s", root->name);
+			break;
+		}
+
+	}
+
 	int height(TreeNode* root){
 		if(!root) return 0;
 
@@ -465,11 +488,16 @@ var_expr:
 %%
 void yyerror(const char* s){
 	/* printf("Error is here\n"); */
-   	fprintf (stderr, "%s\n", s);
+   	fprintf (stderr, "Error: %s\n", s);
 }
 
 
 int main(int argc, char* argv[]){
+	if(argc != 2){
+		fprintf(stderr, "Use this cmd:\n$ %s <file_path>\n", argv[0]);
+		return 0;
+	}
+
 	FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
