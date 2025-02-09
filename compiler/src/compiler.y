@@ -143,9 +143,6 @@
 
 	
 	int evaluate_expr(TreeNode* root){
-		// if(root->token != tokenOp && root->token != tokenNum)
-		// 	return 0;
-		
 		if(!root) return 0;
 
 		if(root->token == tokenVal)
@@ -360,7 +357,7 @@ Lid	:
 
 /* needed for assignment 2 */
 stmt_list:	
-		/* NULL */		{ /* maybe display the symbol table here */ }
+		/* NULL */		{  }
 	|	statement stmt_list	{ }
 	|	error  ';' 		{  }
 	;
