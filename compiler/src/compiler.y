@@ -18,9 +18,11 @@
 %{	
 	#include "tree.hpp"
 	#include <stdio.h>
+	#include <stdlib.h>
 	#include <unordered_map>
+	#include <string>
 
-	std::unordered_map<const char*, int>mem;
+	std::unordered_map<std::string, int>mem;
 
 	int yylex();
 	void yyerror(const char* s);
@@ -122,14 +124,16 @@
 		if(root->token == tokenVal)
 			return root->numValue;
 
-		else if(root->token == tokenVar && !mem.count(root->name)){
-			printf("VAR: %s|\n", root->name);
+		else if(root->token == tokenVar && !mem.count(std::string(root->name))){
+			// printf("VAR: %s|\n", root->name);
+			// char* str;
+			// sprintf(str, "Undefined Variable %s", root->name);
 			yyerror("Undefined Variable");
 			exit(0);
 		}
 
 		else if(root->token == tokenVar){
-			return mem[root->name];
+			return mem[std::string(root->name)];
 		}
 
 		int left_eval = evaluate_expr(root->left);
@@ -142,6 +146,7 @@
 			case '*': ans = left_eval * right_eval; break;
 			case '/':
 				if(right_eval == 0){
+					// char* str = "Division by zero";
 					yyerror("Division by zero");
 					exit(0);
 				} 
@@ -240,7 +245,9 @@ Glist:	Gid { /* printf("%s\n", $1->name); */ $$ = $1; }
 
 Gid	:	VAR	{ /* printf("VARYACC: %s\n", $1); */ 
 		$$ = new TreeNode($1, tokenVar); 
-		mem[$$->name] = 0;
+		if(!mem.count(std::string($1)))
+			mem[std::string($1)] = -1;
+		
 	}
 	|	Gid '[' NUM ']'	{ /* $$ = new TreeNode( "Index tokenOp,", new TreeNode($3)); */ }
 	;
@@ -364,15 +371,19 @@ write_stmt:
 assign_stmt:	
 	var_expr '=' expr 	{ 
 		/* printf("Control Reached :)\n");  */
+		printf("ASSIGN: %s|\n", $1->name);
 		$$ = new TreeNode("=", tokenOp, $1, $3);
 		print_tree($$);
 		
-		if(!mem.count($1->name)){
-			yyerror("Undefined Variable");
+		if(!mem.count(std::string($1->name))){
+			// char* str;
+			// sprintf(str, "Undefined Variable %s", $1->name);
+			yyerror("Undefined variable");
+			
 			exit(0);
 		} 
-		// 	mem[$1->name] = 0;
-		mem[$1->name] = evaluate_expr($3);
+		
+		mem[std::string($1->name)] = evaluate_expr($3);
 	}
 	;
 
@@ -435,7 +446,7 @@ str_expr:
   ;
 
 var_expr:	
-	VAR	{ /* printf("VAR: %s\n", $1); */ $$ = new TreeNode($1, tokenVar); }
+	VAR	{ /* printf("VAR: %s|\n", $1); */ $$ = new TreeNode($1, tokenVar); }
 	|	var_expr '[' expr ']'	{ /* $$ = new TreeNode('V', $1, $3); */ }
 	;
 %%

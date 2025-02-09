@@ -17,12 +17,14 @@
 %{
     #include "tree.hpp"
     #include "y.tab.h"
+    #include <string>
+    #include <iostream>
     int Lineno;
     int wflag;
 
     extern YYSTYPE yylval;
     extern void yyerror(const char* s);
-    extern std::unordered_map<const char*, int> mem;
+    extern std::unordered_map<std::string, int> mem;
 %}
 
 
@@ -72,7 +74,7 @@ false			{ return F; }
 
 {letter}({letter}|{digit})*	{ 
         // printf("VARLEX: %s\n", yytext);
-        yylval.name = yytext;
+        yylval.name = strdup(yytext);
         // printf("VARLEX: %s\n", yylval.name);
         return VAR; 
     }
@@ -80,7 +82,11 @@ false			{ return F; }
 			
 ["]             { return yytext[0]; }
 
-.				{ yyerror("Invalid character 234"); }		
+.				{ 
+        // char* str = "Invalid character";
+        yyerror("Invalid char"); 
+    
+    }		
 	
 \/\/(.*) ; /* Regular expression for single line comment */   
 
@@ -92,9 +98,10 @@ false			{ return F; }
 int yywrap(){
     /* printf("DONE PARSING"); */
     for(auto p: mem){
-        const char* key = p.first;
+        std::string key = p.first;
         int val = p.second;
-        printf("mem[%s] = %d\n", key, val);
+        /* printf("mem[%s] = %d\n", key, val); */
+        std::cout << "mem[" << key << "] = " << val << '\n';
     }
     return 1;
 }
