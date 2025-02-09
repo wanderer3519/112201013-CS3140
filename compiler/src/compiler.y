@@ -74,7 +74,23 @@
 				break;
 
 				case tokenOp:
-				printf("%s", root->name);
+				// printf("%s", root->name);
+					if(root->name[0] == '+'){
+						printf("PLUS");
+					}
+					else if(root->name[0] == '-'){
+						printf("MINUS");
+					}
+					else if(root->name[0] == '*'){
+						printf("MULT");
+					}
+					else if(root->name[0] == '/'){
+						printf("DIV");
+					}
+					else if(root->name[0] == '='){
+						printf("ASSIGN");
+					}
+
 				break;
 
 				case tokenVal:
@@ -108,18 +124,35 @@
 			break;
 			
 			case tokenOp:
-			printf("%s", root->name);
+			// printf("%s ", root->name);
+				if(root->name[0] == '+'){
+					printf("PLUS ");
+				}
+				else if(root->name[0] == '-'){
+					printf("MINUS ");
+				}
+				else if(root->name[0] == '*'){
+					printf("MULT ");
+				}
+				else if(root->name[0] == '/'){
+					printf("DIV ");
+				}
+				else if(root->name[0] == '='){
+					printf("ASSIGN ");
+				}
 			break;
 			
 			case tokenVal:
-			printf("%d", root->numValue);
+			printf("%6d ", root->numValue);
 			break;
 
 			case tokenKey:
-			printf("%s", root->name);
+			printf("%6s ", root->name);
 			break;
 		}
 
+		printAST(root->left);
+		printAST(root->right);
 	}
 
 	int height(TreeNode* root){

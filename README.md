@@ -18,3 +18,5 @@ $ bin/sil_compiler.out <file_path>
 Clean
 $ make clean
 
+You can redirect the output to a text file (sometimes, the tree is very clumsy in the terminal)
+$ bin/sil_compiler.out <file_path> > tree.txt
