@@ -226,7 +226,7 @@
 /* %type <node> Gdecl_sec Gdecl_list */
 %type <node> arg_list1 arg_list arg func ret_type 
 %type <node> Gid expr var_expr func_call param_list para param_list1 str_expr assign_stmt Gdecl_list
-%type <node> Gdecl Glist read_stmt write_stmt statement stmt_list func_stmt
+%type <node> Gdecl Glist read_stmt write_stmt statement stmt_list func_stmt cond_stmt
 
 %token BEG END
 %token <val> T_INT T_BOOL
@@ -446,9 +446,18 @@ assign_stmt:
 	;
 
 cond_stmt:	
-	IF expr THEN stmt_list ENDIF 	{ 						}
-	|	IF expr THEN stmt_list ELSE stmt_list ENDIF 	{ 						}
-    |   FOR '(' assign_stmt   ';'  expr  ';'  assign_stmt ')' '{' stmt_list '}'   {                                                 }
+	IF '(' expr ')' '{' stmt_list '}' 	{
+		TreeNode* left = new TreeNode("IF", tokenKey, nullptr, $6);
+		$$ = new TreeNode("IF_STMT", tokenKey, left, nullptr);
+		print_tree($$);
+	}
+	|	IF '(' expr ')' '{' stmt_list '}' ELSE '{' stmt_list '}' 	{ 
+		TreeNode* left = new TreeNode("IF", tokenKey, nullptr, $6);
+		TreeNode* right = new TreeNode("ELSE", tokenKey, nullptr, $6);
+		$$ = new TreeNode("IF_STMT", tokenKey, left, right); 
+		print_tree($$);
+	}
+    |   FOR '(' assign_stmt   ';'  expr  ';'  assign_stmt ')' '{' stmt_list '}'   {  }
 	;
 
 func_stmt:	
