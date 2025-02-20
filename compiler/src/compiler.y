@@ -263,13 +263,8 @@ Gdecl_sec:	DECL Gdecl_list ENDDECL {
 	
 Gdecl_list:  { $$ = nullptr; }
 	| 	Gdecl Gdecl_list { 
-		// if(!$2)
 			$$ = new TreeNode("DECL", tokenKey, $1, $2); 
-		// else{
-		// 	$$ = $2;
-		// 	$$->right = $1;
-		// }
-	}
+		}
 	;
 	
 /* gdecl: integer var1, var2, var3;
@@ -279,34 +274,33 @@ Gdecl_list:  { $$ = nullptr; }
 	gid: var2
 	gid: var3
 */
-Gdecl 	:	ret_type Glist  ';' { /* $$ = new TreeNode("Key", tokenKey, $1, $2); */ 
-		$$ = $1;
-		$$->right = $2;
-	}
-	;
+Gdecl:	ret_type Glist  ';' {
+			$$ = $1;
+			$$->right = $2;
+		}
+		;
 	
 ret_type:	T_INT		{ 
-		/* printf("%d\n", $1); */
 		$$ = new TreeNode("INT", tokenKey); 
 	}
 	;
 	
-Glist:	Gid { /* printf("%s\n", $1->name); */ $$ = $1; }
-	| 	func { /* $$ = $1; */ }
+Glist:	Gid { $$ = $1; }
+	| 	func {  }
 	|	Gid ',' Glist  { 
 			$$ = $1;
 			$$->right = $3;
 		}
-	|	func ',' Glist { /* $$ = new TreeNode("ARGS", tokenKey, $1, $3); */ }
+	|	func ',' Glist {  }
 	;
 
-Gid	:	VAR	{ /* printf("VARYACC: %s\n", $1); */ 
-		$$ = new TreeNode($1, tokenVar); 
-		if(!mem.count(std::string($1)))
-			mem[std::string($1)] = -1;
-		
-	}
-	|	Gid '[' NUM ']'	{ /* $$ = new TreeNode( "Index tokenOp,", new TreeNode($3)); */ }
+Gid	:	VAR	{
+			$$ = new TreeNode($1, tokenVar); 
+			if(!mem.count(std::string($1)))
+				mem[std::string($1)] = -1;
+			
+		}
+	|	Gid '[' NUM ']'	{  }
 	;
 	
 /* 
@@ -320,20 +314,20 @@ Gid	:	VAR	{ /* printf("VARYACC: %s\n", $1); */
 	var_list: b
 */
 
-func:	VAR '(' arg_list ')' { /* printf("VAR: %s\n", $1); */ $$ = new TreeNode($1, tokenVar,  new TreeNode($1, tokenVar), $3); }
+func:	VAR '(' arg_list ')' { }
 	;
 		
-arg_list: { $$ = nullptr; }	
-	|	arg_list1 { $$ = $1; }
+arg_list: {  }	
+	|	arg_list1 {  }
 	;
 	
 arg_list1:
-    arg_list1 ',' arg { $$ = new TreeNode("ArgList", tokenKey,  $1, $3); }
-    | arg { $$ = new TreeNode("ArgList", tokenKey, $1, nullptr); }
+    arg_list1 ',' arg {  }
+    | arg {  }
     ;
 
 arg:
-    expr { $$ = $1; }  // Argument is just an expression
+    expr {  }  // Argument is just an expression
     ;
 
 /* arg_type:	T_INT		 { $$ = new TreeNode(tokenKey, $1); }
@@ -411,7 +405,7 @@ statement:
 	assign_stmt   ';'		{ $$ = $1; }
 	|	read_stmt  ';'		{ $$ = $1; }
 	|	write_stmt  ';'		{ $$ = $1; }
-	|	cond_stmt 			{ }
+	|	cond_stmt 			{ $$ = $1; }
 	|	func_stmt  ';'		{ }
 	;
 
@@ -439,16 +433,11 @@ write_stmt:
 /* use this */
 assign_stmt:	
 	var_expr '=' expr 	{ 
-		/* printf("Control Reached :)\n");  */
-		// printf("ASSIGN: %s|\n", $1->name);
 		$$ = new TreeNode("=", tokenOp, $1, $3);
 		print_tree($$);
 		
 		if(!mem.count(std::string($1->name))){
-			// char* str;
-			// sprintf(str, "Undefined Variable %s", $1->name);
 			yyerror("Undefined variable");
-			
 			exit(0);
 		} 
 		
@@ -466,7 +455,7 @@ func_stmt:
 	func_call 		{ $$ = $1; print_tree($$); }
 	;
 	
-func_call:	VAR '(' param_list ')'	{ /* printf("VAR: %s\n", $1); */ $$ = new TreeNode("CALL", tokenKey, new TreeNode($1, tokenVar), $3); }
+func_call:	VAR '(' param_list ')'	{ $$ = new TreeNode("CALL", tokenKey, new TreeNode($1, tokenVar), $3); }
 	;
 	
 param_list:	{ $$ = nullptr; }
@@ -510,17 +499,17 @@ expr:
 	;
 
 str_expr:
-    VAR { /* printf("VAR: %s\n", $1); */ $$ = new TreeNode($1, tokenVar); }  // Single VAR node
-  | str_expr VAR { /* printf("VAR: %s\n", $1); */ $$ = new TreeNode("STRING", tokenVar, $1, new TreeNode($2, tokenVar)); }
+    VAR { $$ = new TreeNode($1, tokenVar); }  // Single VAR node
+  | str_expr VAR { $$ = new TreeNode("STRING", tokenVar, $1, new TreeNode($2, tokenVar)); }
   ;
 
 var_expr:	
-	VAR	{ /* printf("VAR: %s|\n", $1); */ $$ = new TreeNode($1, tokenVar); }
-	|	var_expr '[' expr ']'	{ /* $$ = new TreeNode('V', $1, $3); */ }
+	VAR	{ $$ = new TreeNode($1, tokenVar); }
+	|	var_expr '[' expr ']'	{  }
 	;
 %%
+
 void yyerror(const char* s){
-	/* printf("Error is here\n"); */
    	fprintf (stderr, "Error: %s\n", s);
 }
 
