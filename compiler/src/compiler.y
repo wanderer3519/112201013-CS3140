@@ -309,12 +309,12 @@ Gid	:	VAR	{
 			else
 				yyerror("Redefined variable var");
 		}
-	|	Gid '[' NUM ']'	{
-			$$ = new TreeNode("ARRAY", tokenArr, $1, new TreeNode($3, tokenVal));
+	|	VAR '[' NUM ']'	{
+			$$ = new TreeNode("ARRAY", tokenArr, new TreeNode($1, tokenVar), new TreeNode($3, tokenVal));
 
-			if(!mem.count(std::string($1->name))){
-				mem[std::string($1->name)].first = 0;
-				mem[std::string($1->name)].second = std::vector<int>($3, -1);
+			if(!mem.count(std::string($1))){
+				mem[std::string($1)].first = 0;
+				mem[std::string($1)].second = std::vector<int>($3, -1);
 			}
 			else{
 				yyerror("Redefined variable array");
@@ -566,21 +566,21 @@ void yyerror(const char* s){
 
 
 int main(int argc, char* argv[]){
-	/* if(argc != 2){
+	if(argc != 2){
 		fprintf(stderr, "Use this cmd:\n$ %s <file_path>\n", argv[0]);
 		return 0;
-	} */
+	}
 
-	/* FILE *file = fopen(argv[1], "r");
+	FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
         return 1;
-    } */
+    }
 
-	/* yyin = file; */
+	yyin = file;
 
 	yyparse();
 	
-	/* fclose(file); */
+	fclose(file);
 	return 0;
 }
