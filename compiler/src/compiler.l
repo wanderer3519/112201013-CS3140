@@ -19,12 +19,14 @@
     #include "y.tab.h"
     #include <string>
     #include <iostream>
+    #include <vector>
+    
     int Lineno;
     int wflag;
 
     extern YYSTYPE yylval;
     extern void yyerror(const char* s);
-    extern std::unordered_map<std::string, int> mem;
+    extern std::unordered_map<std::string, std::pair<int, std::vector<int>> >mem;
 %}
 
 
@@ -82,7 +84,7 @@ false			{ return F; }
 			
 ["]             { return yytext[0]; }
 
-.				{ 
+.	{ 
         // char* str = "Invalid character";
         yyerror("Invalid char"); 
     
@@ -99,8 +101,9 @@ int yywrap(){
     /* printf("DONE PARSING"); */
     for(auto p: mem){
         std::string key = p.first;
-        int val = p.second;
-        /* printf("mem[%s] = %d\n", key, val); */
+        /* int key1 = p.first; */
+        int val = p.second.first;
+        
         std::cout << "mem[" << key << "] = " << val << '\n';
     }
     return 1;

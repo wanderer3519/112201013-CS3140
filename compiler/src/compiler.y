@@ -18,12 +18,12 @@
 %{	
 	#include "tree.hpp"
 	#include <stdio.h>
-	#include <iostream>
 	#include <stdlib.h>
-	#include <unordered_map>
-	#include <string>
+	#include <bits/stdc++.h>
+	
+	using namespace std;
 
-	std::unordered_map<std::string, int>mem;
+	std::unordered_map<std::string, std::pair<int, std::vector<int>> >mem;
 
 	int yylex();
 	void yyerror(const char* s);
@@ -97,6 +97,10 @@
 				printf("%d", root->numValue);
 				break;
 
+				case tokenArr:
+				printf("%s", root->name);
+				break;
+
 				case tokenKey:
 				printf("%s", root->name);
 				break;
@@ -120,7 +124,7 @@
 
 		switch(root->token){
 			case tokenVar:
-			printf("%s", root->name);
+			printf("%s|", root->name);
 			break;
 			
 			case tokenOp:
@@ -147,7 +151,11 @@
 			break;
 
 			case tokenKey:
-			printf("%6s ", root->name);
+			printf("%6s|", root->name);
+			break;
+
+			case tokenArr:
+			printf("%6s|", root->name);
 			break;
 		}
 
@@ -185,12 +193,12 @@
 			// printf("VAR: %s|\n", root->name);
 			// char* str;
 			// sprintf(str, "Undefined Variable %s", root->name);
-			yyerror("Undefined Variable");
+			yyerror("Undefined Variable in Eval expr");
 			exit(0);
 		}
 
 		else if(root->token == tokenVar){
-			return mem[std::string(root->name)];
+			return mem[std::string(root->name)].first;
 		}
 
 		int left_eval = evaluate_expr(root->left);
@@ -297,10 +305,21 @@ Glist:	Gid { $$ = $1; }
 Gid	:	VAR	{
 			$$ = new TreeNode($1, tokenVar); 
 			if(!mem.count(std::string($1)))
-				mem[std::string($1)] = -1;
-			
+				mem[std::string($1)] = {-1, {}};
+			else
+				yyerror("Redefined variable var");
 		}
-	|	Gid '[' NUM ']'	{  }
+	|	Gid '[' NUM ']'	{
+			$$ = new TreeNode("ARRAY", tokenArr, $1, new TreeNode($3, tokenVal));
+
+			if(!mem.count(std::string($1->name))){
+				mem[std::string($1->name)].first = 0;
+				mem[std::string($1->name)].second = std::vector<int>($3, -1);
+			}
+			else{
+				yyerror("Redefined variable array");
+			}
+		}
 	;
 	
 /* 
@@ -420,7 +439,7 @@ write_stmt:
 		
 		// NodeType token = $3->token;
 		if($3->token == tokenVar){
-			std::cout << mem[$3->name] << '\n';
+			std::cout << mem[$3->name].first << '\n';
 		}
 		else {
 			int eval = evaluate_expr($3);
@@ -436,12 +455,27 @@ assign_stmt:
 		$$ = new TreeNode("=", tokenOp, $1, $3);
 		print_tree($$);
 		
-		if(!mem.count(std::string($1->name))){
-			yyerror("Undefined variable");
+		if($1->token == tokenVar && !mem.count(std::string($1->name))){
+			yyerror("Undefined variable in assign");
 			exit(0);
 		} 
+
+		if($1->token == tokenArr && !mem.count(std::string($1->left->name))){
+			yyerror("Undefined variable in assign");
+			exit(0);
+		}
 		
-		mem[std::string($1->name)] = evaluate_expr($3);
+		int x = evaluate_expr($3);
+
+		if($1->token == tokenVar)
+			mem[std::string($1->name)].first = x;
+		else if($1->token == tokenArr) {
+			int ind = evaluate_expr($1->right);
+			std::string name = std::string($1->left->name);
+
+			cout << mem[name].second[0] << '\n';
+			// mem[name].second[ind] = x;
+		}
 	}
 	;
 
@@ -514,31 +548,39 @@ str_expr:
 
 var_expr:	
 	VAR	{ $$ = new TreeNode($1, tokenVar); }
-	|	var_expr '[' expr ']'	{  }
+	|	var_expr '[' expr ']'	{ $$ = new TreeNode("ARRAY", tokenArr, $1, $3); }
 	;
 %%
 
 void yyerror(const char* s){
-   	fprintf (stderr, "Error: %s\n", s);
+	for(auto p: mem){
+        std::string key = p.first;
+        /* int key1 = p.first; */
+        int val = p.second.first;
+        
+        std::cout << "mem[" << key << "] = " << val << '\n';
+    }
+
+   	fprintf(stderr, "Error: %s\n", s);
 }
 
 
 int main(int argc, char* argv[]){
-	if(argc != 2){
+	/* if(argc != 2){
 		fprintf(stderr, "Use this cmd:\n$ %s <file_path>\n", argv[0]);
 		return 0;
-	}
+	} */
 
-	FILE *file = fopen(argv[1], "r");
+	/* FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");
         return 1;
-    }
+    } */
 
-	yyin = file;
+	/* yyin = file; */
 
 	yyparse();
 	
-	fclose(file);
+	/* fclose(file); */
 	return 0;
 }

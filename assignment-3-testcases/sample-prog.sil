@@ -1,4 +1,3 @@
-
 begindecl
     integer array[10];
     integer key, i;
