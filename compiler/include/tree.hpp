@@ -2,7 +2,6 @@
 #define TREE_HPP
 
 #include <bits/stdc++.h>
-
 using namespace std;
 
 enum NodeType { tokenOp, tokenKey, tokenVar, tokenVal, tokenArr, tokenStr };
@@ -45,5 +44,11 @@ struct TreeNode {
 
 };
 
+
+void print_level(TreeNode* root, int t_level, int p_level, int height);
+int height(TreeNode* root);
+void print_tree(TreeNode* t);
+int evaluate_expr(TreeNode* root);
+void execute_stmt(TreeNode* root);
 
 #endif

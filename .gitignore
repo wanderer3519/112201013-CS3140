@@ -39,5 +39,6 @@
 */hoc1
 */calculator
 
-*/.vscode
+*.vscode/
 compiler/bin/
+*tree.txt
