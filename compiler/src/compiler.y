@@ -239,32 +239,23 @@ statement:
 	;
 
 read_stmt:	
-	READ '(' var_expr ')' { $$ = new TreeNode("READ", tokenKey, nullptr, $3); print_tree($$); }
+	READ '(' var_expr ')' { 
+			$$ = new TreeNode("READ", tokenKey, nullptr, $3); 
+			print_tree($$); 
+		}
 	;
 
 write_stmt:	
 	WRITE '(' expr ')' 	{ 
 		$$ = new TreeNode("WRITE", tokenKey, nullptr, $3); 
 		print_tree($$);
-		
-		// NodeType token = $3->token;
-		if($3->token == tokenVar){
-			cout << mem[$3->name].first << '\n';
-		}
-		else if($3->token == tokenVal) {
-			int eval = evaluate_expr($3);
-			cout << eval << '\n';
-		}
-		else if($3->token == tokenArr){
-			string ind = $3->left->name;
-			int val = evaluate_expr($3->right);
-			cout << mem[ind].second[val] << '\n'; 
-		}
+		execute_stmt($$);
 	 }
 	|	WRITE '(''"' str_expr '"'')'    { 
+			// cout << "Here str_exrp\n";
 			$$ = new TreeNode("WRITE", tokenKey, nullptr, $4); 
 			print_tree($$); 
-			cout << $4->name << '\n';
+			execute_stmt($$);
 		}
 	;
 
@@ -273,58 +264,43 @@ assign_stmt:  { $$ = nullptr; }
 	| var_expr '=' expr 	{ 
 		$$ = new TreeNode("=", tokenOp, $1, $3);
 		print_tree($$);
-		
-		if($1->token == tokenVar && !mem.count($1->name)){
-			yyerror("Undefined variable in assign");
-			exit(0);
-		} 
-
-		if($1->token == tokenArr && !mem.count($1->left->name)){
-			yyerror("Undefined variable in assign");
-			exit(0);
-		}
-		
-		int x = evaluate_expr($3);
-
-		if($1->token == tokenVar)
-			mem[$1->name].first = x;
-		
-		else if($1->token == tokenArr) {
-			int ind = evaluate_expr($1->right);
-			string name = $1->left->name;
-
-			// cout << mem[name].second[0] << '\n';
-			mem[name].second[ind] = x;
-		}
+		execute_stmt($$);
 	}
 	;
 
 cond_stmt:	
 	IF '(' expr ')' '{' stmt_list '}' 	{
-			TreeNode* left = new TreeNode("IF", tokenKey, nullptr, $6);
-			$$ = new TreeNode("IF_STMT", tokenKey, left, nullptr);
+			TreeNode* left = new TreeNode("IF", tokenKey, $3, $6);
+			TreeNode* left_right = new TreeNode("Buf", tokenKey, left, nullptr);
+			
+			$$ = new TreeNode("IF_STMT", tokenKey, $3, left_right);
 			print_tree($$);
-
-			int exp = evaluate_expr($3);
-			if(exp){
-				// fill this blank	
-				TreeNode* curr = $6;
-				while(curr->right){
-					execute_stmt(curr);
-				}
-			}
+			execute_stmt($$);
 		}
 
 	|	IF '(' expr ')' '{' stmt_list '}' ELSE '{' stmt_list '}' 	{ 
 			TreeNode* left = new TreeNode("IF", tokenKey, nullptr, $6);
 			TreeNode* right = new TreeNode("ELSE", tokenKey, nullptr, $10);
-
 			TreeNode* left_right = new TreeNode("Buf", tokenKey, left, right);
+
 			$$ = new TreeNode("IF_STMT", tokenKey, $3, left_right); 
+			
 			print_tree($$);
+			execute_stmt($$);
 		}
 
-    |   FOR '(' assign_stmt   ';'  expr  ';'  assign_stmt ')' '{' stmt_list '}'   {  }
+    |   FOR '(' assign_stmt   ';'  expr  ';'  assign_stmt ')' '{' stmt_list '}'   { 
+			$$ = new TreeNode("FOR_STMT", tokenKey);
+			$$->left = new TreeNode("Buf1", tokenKey, $3, $5);
+			$$->right = new TreeNode("Buf2", tokenKey, $7, $10);
+
+			int var = mem[$3->left].first;
+			int num = evaluate_expr($3->right);
+			
+			while(){
+				
+			}
+	 	}
 	;
 
 func_stmt:	
@@ -380,6 +356,7 @@ str_expr:
 		}  // Single VAR node
   | str_expr VAR { 
 			string name = $1->left->name;
+			name += ' ';
 			for(auto c: name){
 				name.push_back(c);
 			}

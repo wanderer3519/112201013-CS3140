@@ -1,6 +1,3 @@
-#ifndef COMPILER_CPP
-#define COMPILER_CPP
-
 #include "tree.hpp"
 #include <bits/stdc++.h>
 using namespace std;
@@ -20,7 +17,7 @@ void print_level(TreeNode* root, int t_level, int p_level, int height) {
 	if(t_level > p_level) {
 		fprintf(stderr, "Error in print_level\n");
 		return;
-		}
+	}
 	if(t_level < p_level) {
 		if (root != NULL)
 			print_level(root->left, t_level+1, p_level, height);
@@ -71,18 +68,7 @@ void print_level(TreeNode* root, int t_level, int p_level, int height) {
 			case tokenVal:
 			printf("%d", root->numValue);
 			break;
-			// case tokenArr:
-			// // printf("%s", root->name);
-			// cout << root->name;
-			// break;
-			// case tokenKey:
-			// // printf("%s", root->name);
-			// cout << root->name;
-			// break;
-			// case tokenStr:
-			// // printf("%s", root->name);
-			// cout << root->name;
-			// break;
+			
 			default:
 				cout << root->name;
 			break;
@@ -144,12 +130,90 @@ int evaluate_expr(TreeNode* root){
 			} 
 			ans = left_eval / right_eval;
 		break;
+        
+        case '>': ans = left_eval > right_eval; break;
+        case '<': ans = left_eval < right_eval; break;
 	}
 	return ans;
 }
 
 void execute_stmt(TreeNode* root){
+    if(!root) return;
 
+
+    // cout << "DEBUG: " << root->name << '\n';
+
+    /* Write every statement as a function then use them */
+    
+    if(root->name == "WRITE"){
+        // $3 = root->right
+        // string printing
+        if(root->right->name == "STRING")
+            cout << root->right->left->name << '\n';
+        
+        // expr printing 
+        else {
+            
+            if(root->right->token == tokenVar){
+                cout << mem[root->right->name].first << '\n';
+            }
+            else if(root->right->token == tokenVal) {
+                int eval = evaluate_expr(root->right);
+                cout << eval << '\n';
+            }
+            else if(root->right->token == tokenArr){
+                string ind = root->right->left->name;
+                int val = evaluate_expr(root->right->right);
+                cout << mem[ind].second[val] << '\n'; 
+            }
+        } 
+        
+    }
+
+    else if(root->name == "="){
+        if(root->left->token == tokenVar && !mem.count(root->left->name)){
+			yyerror("Undefined variable in assign");
+			exit(0);
+		} 
+
+		if(root->left->token == tokenArr && !mem.count(root->left->left->name)){
+			yyerror("Undefined variable in assign");
+			exit(0);
+		}
+		
+		int x = evaluate_expr(root->right);
+
+		if(root->left->token == tokenVar)
+			mem[root->left->name].first = x;
+		
+		else if(root->left->token == tokenArr) {
+			int ind = evaluate_expr(root->left->right);
+			string name = root->left->left->name;
+
+			// cout << mem[name].second[0] << '\n';
+			mem[name].second[ind] = x;
+		}
+    }
+
+    else {
+        int exp = evaluate_expr(root->left);
+		if(exp){
+			// curr is the stmt_list
+			TreeNode* curr = root->right->left->right;
+			while(curr){
+				execute_stmt(curr->left);
+				curr = curr->right;
+			}
+		}
+
+        else{
+            // curr is the stmt_list
+            TreeNode* curr = root->right->right->right;
+            
+            while(curr){
+                execute_stmt(curr->left);
+                curr = curr->right;
+            }
+        }
+    }
 }
-
-#endif
