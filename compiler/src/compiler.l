@@ -17,16 +17,16 @@
 %{
     #include "tree.hpp"
     #include "y.tab.h"
-    #include <string>
-    #include <iostream>
-    #include <vector>
+    #include <bits/stdc++.h>
+    using namespace std;
+    
     
     int Lineno;
     int wflag;
 
     extern YYSTYPE yylval;
     extern void yyerror(const char* s);
-    extern std::unordered_map<std::string, std::pair<int, std::vector<int>> >mem;
+    extern unordered_map<string, pair<int, vector<int>> >mem;
 %}
 
 
@@ -84,27 +84,40 @@ false			{ return F; }
 			
 ["]             { return yytext[0]; }
 
+\/\/(.*) ; /* Regular expression for single line comment */   
+
+{start}.*{end} ; /* Regular expression for multi line comment */  
+
 .	{ 
         // char* str = "Invalid character";
         yyerror("Invalid char"); 
     
     }		
 	
-\/\/(.*) ; /* Regular expression for single line comment */   
 
-{start}.*{end} ; /* Regular expression for multi line comment */  
   
 %%
 
 
 int yywrap(){
-    /* printf("DONE PARSING"); */
+    printf("\nDONE PARSING...\nPrinting symbol table\n");
     for(auto p: mem){
-        std::string key = p.first;
+        /* P: pair of string, pair<int, vector<int>> */
+
+        string key = p.first;
         /* int key1 = p.first; */
         int val = p.second.first;
-        
-        std::cout << "mem[" << key << "] = " << val << '\n';
+
+        cout << "mem[" << key << "] = ";
+
+        if(!p.second.second.empty()){
+            for(auto num: p.second.second){
+                cout <<  num << ", ";        
+            }
+            cout << "NULL\n";
+        }
+        else
+            cout << val << '\n';
     }
     return 1;
 }

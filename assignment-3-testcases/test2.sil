@@ -1,0 +1,14 @@
+begindecl
+integer var[5];
+integer var1;
+enddecl
+
+var[2] = 10;
+
+
+if(var[2] > 11){
+    write(var[2]);
+}
+else{
+    write("Hello");
+}
