@@ -195,7 +195,7 @@ void execute_stmt(TreeNode* root){
 		}
     }
 
-    else {
+    else if(root->name == "IF_STMT") {
         int exp = evaluate_expr(root->left);
 		if(exp){
 			// curr is the stmt_list
@@ -216,4 +216,23 @@ void execute_stmt(TreeNode* root){
             }
         }
     }
+	else if(root->name == "FOR_STMT"){
+		execute_stmt(root->left->left); // execute assign
+		
+		TreeNode* cond = root->left->right;
+		int flag = evaluate_expr(cond);
+		while(flag){
+			// cout << "Hello1\n";
+			TreeNode* stlist = root->right->right;
+
+			while(stlist){
+				execute_stmt(stlist->left);
+				stlist = stlist->right;
+			}
+
+			execute_stmt(root->right->left); // execute assign
+			cond = root->left->right;
+			flag = evaluate_expr(cond);
+		}
+	}
 }

@@ -293,13 +293,9 @@ cond_stmt:
 			$$ = new TreeNode("FOR_STMT", tokenKey);
 			$$->left = new TreeNode("Buf1", tokenKey, $3, $5);
 			$$->right = new TreeNode("Buf2", tokenKey, $7, $10);
-
-			int var = mem[$3->left].first;
-			int num = evaluate_expr($3->right);
 			
-			while(){
-				
-			}
+			print_tree($$);
+			execute_stmt($$);
 	 	}
 	;
 
