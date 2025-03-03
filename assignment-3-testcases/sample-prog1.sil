@@ -4,30 +4,28 @@ begindecl
     integer start, end, mid, result;
 enddecl
 
-for(i = 0; i < 10; i++){
-    array[i] = i + 10;
-}
-
-start = 0;
-end = 9;
-key = array[5];
-
 begin
-for( ; start < end; ){
-    mid=(start+end)/2;
-    if(array[mid]==key) then
-        result=mid;
-        break;
-    
-    else 
-        if (array[mid]>key) then
-            start = mid + 1;
-        
+    for(i = 0; i < 10; i = i + 1){
+        array[i] = i + 10;
+    }
 
+    start = 0;
+    end = 9;
+    key = array[5];
+
+    for( ; start < end; ){
+        mid = (start + end) / 2;
+        if(array[mid] == key) then
+            result = mid;
+            break;
+        
         else 
-            end-mid-1;
+            if (array[mid] > key) then
+                start = mid + 1;
+            else 
+                end = mid - 1;
+            endif
         endif
-    endif
-}
-write(result);
+    }
+    write(result);
 end

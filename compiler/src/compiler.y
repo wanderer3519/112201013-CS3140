@@ -249,13 +249,13 @@ write_stmt:
 	WRITE '(' expr ')' 	{ 
 		$$ = new TreeNode("WRITE", tokenKey, nullptr, $3); 
 		print_tree($$);
-		execute_stmt($$);
+		// execute_stmt($$);
 	 }
 	|	WRITE '(''"' str_expr '"'')'    { 
 			// cout << "Here str_exrp\n";
 			$$ = new TreeNode("WRITE", tokenKey, nullptr, $4); 
 			print_tree($$); 
-			execute_stmt($$);
+			// execute_stmt($$);
 		}
 	;
 
@@ -270,7 +270,6 @@ assign_stmt:  { $$ = nullptr; }
 
 cond_stmt:	
 	IF '(' expr ')' THEN stmt_list ENDIF 	{
-			// TreeNode* left = new TreeNode("IF", tokenKey, nullptr, $6);
 			TreeNode* right = new TreeNode("Buf", tokenKey, $6, nullptr);
 			
 			$$ = new TreeNode("IF_ELSE", tokenKey, $3, right);
@@ -279,8 +278,6 @@ cond_stmt:
 		}
 
 	|	IF '(' expr ')' THEN stmt_list  ELSE  stmt_list  ENDIF	{ 
-			// TreeNode* left = new TreeNode("IF", tokenKey, nullptr, $6);
-			// TreeNode* right = new TreeNode("ELSE", tokenKey, nullptr, $8);
 			TreeNode* right = new TreeNode("Buf", tokenKey, $6, $8);
 
 			$$ = new TreeNode("IF_ELSE", tokenKey, $3, right); 
