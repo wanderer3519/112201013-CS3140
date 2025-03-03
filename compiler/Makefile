@@ -7,4 +7,7 @@ all:
 clean:
 	rm -rf *.tab.c *.yy.c *.tab.[hc] bin/
 
-
+rebuild: clean all
+	make clean
+	make
+	bin/compiler ../assignment-3-testcases/test.sil

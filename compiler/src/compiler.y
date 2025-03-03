@@ -192,7 +192,7 @@ ret_stmt:
 		
 MainBlock: 	
 	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }			  
-	| stmt_list
+	| BEG stmt_list END
 	;
 	
 main:	MAIN		{ 					}
@@ -269,21 +269,21 @@ assign_stmt:  { $$ = nullptr; }
 	;
 
 cond_stmt:	
-	IF '(' expr ')' '{' stmt_list '}' 	{
-			TreeNode* left = new TreeNode("IF", tokenKey, $3, $6);
-			TreeNode* left_right = new TreeNode("Buf", tokenKey, left, nullptr);
+	IF '(' expr ')' THEN stmt_list ENDIF 	{
+			// TreeNode* left = new TreeNode("IF", tokenKey, nullptr, $6);
+			TreeNode* right = new TreeNode("Buf", tokenKey, $6, nullptr);
 			
-			$$ = new TreeNode("IF_STMT", tokenKey, $3, left_right);
+			$$ = new TreeNode("IF_ELSE", tokenKey, $3, right);
 			print_tree($$);
 			execute_stmt($$);
 		}
 
-	|	IF '(' expr ')' '{' stmt_list '}' ELSE '{' stmt_list '}' 	{ 
-			TreeNode* left = new TreeNode("IF", tokenKey, nullptr, $6);
-			TreeNode* right = new TreeNode("ELSE", tokenKey, nullptr, $10);
-			TreeNode* left_right = new TreeNode("Buf", tokenKey, left, right);
+	|	IF '(' expr ')' THEN stmt_list  ELSE  stmt_list  ENDIF	{ 
+			// TreeNode* left = new TreeNode("IF", tokenKey, nullptr, $6);
+			// TreeNode* right = new TreeNode("ELSE", tokenKey, nullptr, $8);
+			TreeNode* right = new TreeNode("Buf", tokenKey, $6, $8);
 
-			$$ = new TreeNode("IF_STMT", tokenKey, $3, left_right); 
+			$$ = new TreeNode("IF_ELSE", tokenKey, $3, right); 
 			
 			print_tree($$);
 			execute_stmt($$);

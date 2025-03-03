@@ -12,18 +12,22 @@ start = 0;
 end = 9;
 key = array[5];
 
+begin
 for( ; start < end; ){
     mid=(start+end)/2;
-    if(array[mid]==key) {
+    if(array[mid]==key) then
         result=mid;
         break;
-    }
-    else if (array[mid]>key){ 
-        start = mid + 1;
-    }
+    
+    else 
+        if (array[mid]>key) then
+            start = mid + 1;
+        
 
-    else {
-        end-mid-1;
-    }
+        else 
+            end-mid-1;
+        endif
+    endif
 }
 write(result);
+end
