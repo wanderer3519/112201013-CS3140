@@ -1,0 +1,10 @@
+begindecl
+integer var[10];
+enddecl
+
+begin
+    if(1 > 2) then
+        write("Hello");
+        write("World");
+    endif
+end
