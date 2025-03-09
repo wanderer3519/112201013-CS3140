@@ -192,7 +192,7 @@ ret_stmt:
 		
 MainBlock: 	
 	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }			  
-	| BEG stmt_list END
+	| BEG stmt_list END { execute_stmt($2); }
 	;
 	
 main:	MAIN		{ 					}
@@ -248,13 +248,13 @@ read_stmt:
 write_stmt:	
 	WRITE '(' expr ')' 	{ 
 		$$ = new TreeNode("WRITE", tokenKey, nullptr, $3); 
-		print_tree($$);
+		// print_tree($$);
 		// execute_stmt($$);
 	 }
 	|	WRITE '(''"' str_expr '"'')'    { 
 			// cout << "Here str_exrp\n";
 			$$ = new TreeNode("WRITE", tokenKey, nullptr, $4); 
-			print_tree($$); 
+			// print_tree($$); 
 			// execute_stmt($$);
 		}
 	;
@@ -263,8 +263,8 @@ write_stmt:
 assign_stmt:  { $$ = nullptr; }
 	| var_expr '=' expr 	{ 
 		$$ = new TreeNode("=", tokenOp, $1, $3);
-		print_tree($$);
-		execute_stmt($$);
+		// print_tree($$);
+		// execute_stmt($$);
 	}
 	;
 
@@ -273,8 +273,9 @@ cond_stmt:
 			TreeNode* right = new TreeNode("Buf", tokenKey, $6, nullptr);
 			
 			$$ = new TreeNode("IF_ELSE", tokenKey, $3, right);
-			print_tree($$);
-			execute_stmt($$);
+			// print_tree($$);
+			
+			
 		}
 
 	|	IF '(' expr ')' THEN stmt_list  ELSE  stmt_list  ENDIF	{ 
@@ -282,8 +283,8 @@ cond_stmt:
 
 			$$ = new TreeNode("IF_ELSE", tokenKey, $3, right); 
 			
-			print_tree($$);
-			execute_stmt($$);
+			// print_tree($$);
+			// execute_stmt($$);
 		}
 
     |   FOR '(' assign_stmt   ';'  expr  ';'  assign_stmt ')' '{' stmt_list '}'   { 
@@ -291,8 +292,8 @@ cond_stmt:
 			$$->left = new TreeNode("Buf1", tokenKey, $3, $5);
 			$$->right = new TreeNode("Buf2", tokenKey, $7, $10);
 			
-			print_tree($$);
-			execute_stmt($$);
+			// print_tree($$);
+			// execute_stmt($$);
 	 	}
 	;
 

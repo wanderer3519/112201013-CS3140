@@ -197,10 +197,11 @@ void execute_stmt(TreeNode* root){
 
     else if(root->name == "IF_ELSE") {
         int exp = evaluate_expr(root->left);
+		printf("EXP: %d\n", exp);
 		if(exp){
 			// curr is the stmt_list
 			TreeNode* curr = root->right->left;
-			cout << curr->name << '\n';
+			// cout << curr->name << '\n';
 			while(curr){
 				execute_stmt(curr->left);
 				curr = curr->right;
@@ -235,5 +236,10 @@ void execute_stmt(TreeNode* root){
 			cond = root->left->right;
 			flag = evaluate_expr(cond);
 		}
+	}
+	else if(root->name == "STMT_LIST"){
+		execute_stmt(root->left);
+		print_tree(root->left);
+		execute_stmt(root->right);
 	}
 }
