@@ -242,4 +242,21 @@ void execute_stmt(TreeNode* root){
 		print_tree(root->left);
 		execute_stmt(root->right);
 	}
+	else if(root->name == "DO_WHILE"){
+		int condition = evaluate_expr(root->left);
+		
+		do
+		{
+			/* code */
+			TreeNode* stlist = root->right;
+
+			while(stlist){
+				execute_stmt(stlist->left);
+				stlist = stlist->right;
+			}
+
+			condition = evaluate_expr(root->left);
+		} while (condition);
+		
+	}
 }
