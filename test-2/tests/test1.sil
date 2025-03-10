@@ -5,4 +5,8 @@ enddecl
 begin
     var1 = 10;
     var2 = 20;
+
+    do {
+        var1 = var1 - 1;
+    }while(var1 < 11);
 end

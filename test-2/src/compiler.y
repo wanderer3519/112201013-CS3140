@@ -295,6 +295,9 @@ cond_stmt:
 			// print_tree($$);
 			// execute_stmt($$);
 	 	}
+	| DO '{' stmt_list '}' WHILE '(' expr ')' ';' { 
+			$$ = new TreeNode("DO_WHILE", tokenKey, $7, $3); 
+		}
 	;
 
 func_stmt:	
