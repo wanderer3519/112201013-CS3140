@@ -105,73 +105,100 @@ void print_tree(TreeNode* t) {
 	return;
 }
 
-float evaluate_expr(TreeNode* root){
-	if(!root) return 0;
-	if(root->token == tokenVal)
-		return root->numValue;
-	else if(root->token == tokenFloat)
-		return root->floatValue;
-	
-	else if((root->token == tokenVar || root->token == tokenArr || root->token == token2d) 
-	&& !mem.count(root->name)
-	&& !fmem.count(root->name)
-	){
-		// printf("VAR: %s|\n", root->name);
-		// char* str;
-		// sprintf(str, "Undefined Variable %s", root->name);
+
+
+float evaluate_expr(TreeNode* root) {
+    if (!root) return 0;
+    
+    // Return value if it's a number
+    if (root->token == tokenVal) return root->numValue;
+    if (root->token == tokenFloat) return root->floatValue;
+
+    // Check if variable is undefined
+    if (((root->token == tokenVar) 
+        && !mem.count(root->name) && !fmem.count(root->name))
+		|| (root->token == token2d && !mem2d.count(root->left->name) && !fmem2d.count(root->left->name))
+		) {
+        // cout << "NAME: " << root->name << '\n';
 		yyerror("Undefined Variable in Eval expr");
-		exit(0);
-	}
-	else if(root->token == tokenVar && mem.count(root->name)){
-		return mem[root->name].first;
-	}
-	else if(root->token == tokenVar && fmem.count(root->name)){
-		return fmem[root->name].first;
-	}
-	else if(root->token == tokenArr){
-		int x = (int) evaluate_expr(root->right);
-		if(mem.count(root->left->name)){
-			return mem[root->left->name].second[x];
-		}
-		else if(fmem.count(root->left->name)){
-			return fmem[root->left->name].second[x];
-		}
-	}
+        exit(1);
+    }
 
-	else if(root->token == token2d){
-		int x = (int) evaluate_expr(root->right->left);
-		int y = (int) evaluate_expr(root->right->left);
-	
-		if(mem2d.count(root->left->name)){
-			return mem2d[root->left->name][x][y];
-		}
-		else if(fmem2d.count(root->left->name)){
-			return fmem2d[root->left->name][x][y];
-		}
-	}
+    // Variable evaluation
+    if (root->token == tokenVar) {
+        if (mem.count(root->name)) return mem[root->name].first;
+        if (fmem.count(root->name)) return fmem[root->name].first;
+    }
 
-
-	float left_eval = evaluate_expr(root->left);
-	float right_eval = evaluate_expr(root->right);
-	float ans = 0;
-	switch(root->name[0]){
-		case '+': ans = left_eval + right_eval; break;
-		case '-': ans = left_eval - right_eval; break;
-		case '*': ans = left_eval * right_eval; break;
-		case '/':
-			if(right_eval == 0){
-				// char* str = "Division by zero";
-				yyerror("Division by zero");
-				exit(0);
-			} 
-			ans = left_eval / right_eval;
-		break;
+    // 1D Array evaluation
+    if (root->token == tokenArr) {
+        int x = (int)evaluate_expr(root->right);
         
+        if (mem.count(root->left->name)) {
+            if (x < 0 || x >= mem[root->left->name].second.size()) {
+                yyerror("Array index out of bounds");
+                exit(1);
+            }
+            return mem[root->left->name].second[x];
+        }
+        else if (fmem.count(root->left->name)) {
+            if (x < 0 || x >= fmem[root->left->name].second.size()) {
+                yyerror("Array index out of bounds");
+                exit(1);
+            }
+            return fmem[root->left->name].second[x];
+        }
+    }
+
+    // 2D Array evaluation
+    if (root->token == token2d) {
+        int x = (int)evaluate_expr(root->right->left);
+        int y = (int)evaluate_expr(root->right->right);  // FIXED from `root->right->left`
+
+        if (mem2d.count(root->left->name)) {
+            if (x < 0 || x >= mem2d[root->left->name].size() || 
+                y < 0 || y >= mem2d[root->left->name][x].size()) {
+                yyerror("2D array index out of bounds");
+                exit(1);
+            }
+            return mem2d[root->left->name][x][y];
+        }
+        else if (fmem2d.count(root->left->name)) {
+            if (x < 0 || x >= fmem2d[root->left->name].size() || 
+                y < 0 || y >= fmem2d[root->left->name][x].size()) {
+                yyerror("2D array index out of bounds");
+                exit(1);
+            }
+            return fmem2d[root->left->name][x][y];
+        }
+    }
+
+    // Evaluate left and right subtrees
+    float left_eval = evaluate_expr(root->left);
+    float right_eval = evaluate_expr(root->right);
+    float ans = 0;
+
+    // Perform operation based on root->name[0] (assuming operator is stored as a string)
+    switch (root->name[0]) {
+        case '+': ans = left_eval + right_eval; break;
+        case '-': ans = left_eval - right_eval; break;
+        case '*': ans = left_eval * right_eval; break;
+        case '/':
+            if (right_eval == 0) {
+                yyerror("Division by zero");
+                exit(1);
+            }
+            ans = left_eval / right_eval;
+            break;
         case '>': ans = left_eval > right_eval; break;
         case '<': ans = left_eval < right_eval; break;
-	}
-	return ans;
+    }
+
+    return ans;
 }
+
+
+
 
 void execute_stmt(TreeNode* root){
     if(!root) return;
@@ -213,6 +240,11 @@ void execute_stmt(TreeNode* root){
 				cout << eval << '\n';
 			}
 
+			else if(root->right->token == tokenOp){
+				float x = evaluate_expr(root->right);
+				cout << x << '\n';
+			}
+
 			else if(root->right->token == tokenArr){
 				int x = (int) evaluate_expr(root->right);
 				if(mem.count(root->left->name)){
@@ -223,17 +255,20 @@ void execute_stmt(TreeNode* root){
 				}
 			}
 
-			else if(root->left->token == token2d){
-				int x = (int) evaluate_expr(root->right->left);
-				int y = (int) evaluate_expr(root->right->left);
+			else if(root->right->token == token2d){
+				int x = (int) evaluate_expr(root->right->right->left);
+				int y = (int) evaluate_expr(root->right->right->right);
 			
-				if(mem2d.count(root->left->name)){
-					cout << mem2d[root->left->name][x][y] << '\n';
+				string name = root->right->left->name;
+
+				if(mem2d.count(name)){
+					cout << mem2d[name][x][y] << '\n';
 				}
-				else if(fmem2d.count(root->left->name)){
-					cout << fmem2d[root->left->name][x][y] << '\n';
+				else if(fmem2d.count(name)){
+					cout << fmem2d[name][x][y] << '\n';
 				}
 			}
+			
         } 
         
     }

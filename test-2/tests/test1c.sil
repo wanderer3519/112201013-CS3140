@@ -1,13 +1,13 @@
-begindecl
-integer var1, var2;
+decl
+integer arr1[10];
+integer arr2[10];
+integer i;
 enddecl
-
 begin
-    var1 = 10;
-    var2 = 20;
-
+    i = 0;
     do {
-        var1 = var1 - 1;
-        write(var1);
-    } while(var1 > 0);
+        arr1[i] = i;
+        arr2[i] = 2 * arr1[i];
+        i = i + 1;
+    } while (i < 10);
 end

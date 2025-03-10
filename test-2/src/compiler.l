@@ -51,7 +51,7 @@ write			{ return WRITE; }
 integer			{ return T_INT; }	
 boolean			{ return T_BOOL; }
 float           { return T_FLOAT; }
-begindecl		{ return DECL; }
+decl		{ return DECL; }
 enddecl			{ return ENDDECL; }
 
 if				{ return IF; }

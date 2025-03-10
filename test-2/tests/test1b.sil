@@ -1,0 +1,11 @@
+decl
+    integer arr[3][4];
+    integer i;
+enddecl
+
+begin
+    arr[0][0] = 10;
+    i = 1;
+    arr[0][i] = 2 * arr[0][0];
+    write(arr[0][i]);
+end
