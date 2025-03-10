@@ -5,6 +5,10 @@ using namespace std;
 extern void yyerror(const char* s);
 extern unordered_map<string, pair<int, vector<int>> >mem;
 extern unordered_map<string, pair<float, vector<float>> >fmem;
+
+extern unordered_map< string, vector< vector<int> > > mem2d;
+extern unordered_map< string, vector< vector<float> >> fmem2d;
+
 /*	Helper function to print one level of a binary tree */
 void print_level(TreeNode* root, int t_level, int p_level, int height) {
 /*
@@ -108,7 +112,10 @@ float evaluate_expr(TreeNode* root){
 	else if(root->token == tokenFloat)
 		return root->floatValue;
 	
-	else if(root->token == tokenVar && !mem.count(root->name)){
+	else if((root->token == tokenVar || root->token == tokenArr || root->token == token2d) 
+	&& !mem.count(root->name)
+	&& !fmem.count(root->name)
+	){
 		// printf("VAR: %s|\n", root->name);
 		// char* str;
 		// sprintf(str, "Undefined Variable %s", root->name);
@@ -121,6 +128,29 @@ float evaluate_expr(TreeNode* root){
 	else if(root->token == tokenVar && fmem.count(root->name)){
 		return fmem[root->name].first;
 	}
+	else if(root->token == tokenArr){
+		int x = (int) evaluate_expr(root->right);
+		if(mem.count(root->left->name)){
+			return mem[root->left->name].second[x];
+		}
+		else if(fmem.count(root->left->name)){
+			return fmem[root->left->name].second[x];
+		}
+	}
+
+	else if(root->token == token2d){
+		int x = (int) evaluate_expr(root->right->left);
+		int y = (int) evaluate_expr(root->right->left);
+	
+		if(mem2d.count(root->left->name)){
+			return mem2d[root->left->name][x][y];
+		}
+		else if(fmem2d.count(root->left->name)){
+			return fmem2d[root->left->name][x][y];
+		}
+	}
+
+
 	float left_eval = evaluate_expr(root->left);
 	float right_eval = evaluate_expr(root->right);
 	float ans = 0;
@@ -182,12 +212,34 @@ void execute_stmt(TreeNode* root){
 				float eval = evaluate_expr(root->right);
 				cout << eval << '\n';
 			}
+
+			else if(root->right->token == tokenArr){
+				int x = (int) evaluate_expr(root->right);
+				if(mem.count(root->left->name)){
+					cout << mem[root->left->name].second[x] << '\n';
+				}
+				else if(fmem.count(root->left->name)){
+					cout << fmem[root->left->name].second[x] << '\n';
+				}
+			}
+
+			else if(root->left->token == token2d){
+				int x = (int) evaluate_expr(root->right->left);
+				int y = (int) evaluate_expr(root->right->left);
+			
+				if(mem2d.count(root->left->name)){
+					cout << mem2d[root->left->name][x][y] << '\n';
+				}
+				else if(fmem2d.count(root->left->name)){
+					cout << fmem2d[root->left->name][x][y] << '\n';
+				}
+			}
         } 
         
     }
 
     else if(root->name == "="){
-		cout << "In assign " << root->left->name << '\n';
+		// cout << "In assign " << root->left->name << '\n';
 
         if(root->left->token == tokenVar 
 		&& !mem.count(root->left->name)
@@ -203,7 +255,7 @@ void execute_stmt(TreeNode* root){
 			exit(0);
 		}
 		
-		if(mem.count(root->left->name)){
+		if(root->left->token == tokenVar && mem.count(root->left->name)){
 			int x = (int) evaluate_expr(root->right);
 
 			if(root->left->token == tokenVar){
@@ -221,7 +273,7 @@ void execute_stmt(TreeNode* root){
 			}
 		}
 
-		else if(fmem.count(root->left->name)){
+		else if(root->left->token == tokenVar && fmem.count(root->left->name)){
 			// implement float here
 			float x = evaluate_expr(root->right);
 
@@ -236,6 +288,40 @@ void execute_stmt(TreeNode* root){
 
 				// cout << mem[name].second[0] << '\n';
 				fmem[name].second[ind] = x;
+			}
+		}
+		else if(root->left->token == tokenArr){
+			int ind = (int) evaluate_expr(root->left->right);
+			string name = root->left->left->name;
+
+			if(mem.count(name)){
+				int x = (int) evaluate_expr(root->right);
+				mem[name].second[ind] = x;	
+			}
+			else if(fmem.count(name)){
+				float x = evaluate_expr(root->right);
+				fmem[name].second[ind] = x;
+			}
+
+			// cout << mem[name].second[0] << '\n';
+			
+		}
+
+		else if(root->left->token == token2d){
+			int x = (int) evaluate_expr(root->left->right->left);
+			int y = (int) evaluate_expr(root->left->right->right);
+
+			string name = root->left->left->name;
+
+			if(mem2d.count(name)){
+				int val = evaluate_expr(root->right);
+
+				mem2d[name][x][y] = val; 
+			}
+			else if(fmem2d.count(name)){
+				float val = evaluate_expr(root->right);
+
+				fmem2d[name][x][y] = val;
 			}
 		}
     }
@@ -326,14 +412,36 @@ void declare_vars(TreeNode* root){
 				else if(var->token == tokenArr){
 					if(!fmem.count(var->left->name) && !mem.count(var->left->name)){
 						fmem[var->left->name].first = 0.00;
-						fmem[var->left->name].second = vector<float>(var->right->numValue, -1);
+						fmem[var->left->name].second = vector<float>(var->right->numValue, -1.00);
 					}
 					else{
 						yyerror("Redefined variable array");
 						// exit(1);
 					}
 				}
-				
+				// else if(var->left->token == token2d){
+				// 	if(!mem2d.count(var->left->name) && !fmem2d.count(var->left->name)){
+				// 		fmem2d[var->left->name] = vector<vector<float>>(var->right->left->numValue, vector<float>(var->right->right->numValue, -1.00));
+				// 		// mem[var->left->name].second = vector<int>(var->right->numValue, -1);
+				// 	}
+				// 	else{
+				// 		yyerror("Redefined variable array");
+				// 		// exit(1);
+				// 	}
+				// }
+
+				else if (var->token == token2d) {
+					if (!mem2d.count(var->left->name) && !fmem2d.count(var->left->name)) {
+						fmem2d[var->left->name] = vector<vector<float>>(
+							var->right->left->numValue, 
+							vector<float>(var->right->right->numValue, -1.00)
+						);
+					} else {
+						yyerror("Redefined variable array");
+					}
+				}
+
+
 				var = var->right;
 			}
 			
@@ -363,10 +471,34 @@ void declare_vars(TreeNode* root){
 						// exit(1);
 					}
 				}
+				// else if(var->left->token == token2d){
+				// 	if(!mem2d.count(var->left->name) && !fmem2d.count(var->left->name)){
+				// 		mem2d[var->left->name] = vector<vector<int>>(var->right->left->numValue, vector<int>(var->right->right->numValue, -1));
+				// 		// mem[var->left->name].second = vector<int>(var->right->numValue, -1);
+				// 	}
+				// 	else{
+				// 		yyerror("Redefined variable array");
+				// 		// exit(1);
+				// 	}
+				// }
 				
+				else if (var->token == token2d) {
+					if (!mem2d.count(var->left->name) && !fmem2d.count(var->left->name)) {
+						mem2d[var->left->name] = vector<vector<int>>(
+							var->right->left->numValue, 
+							vector<int>(var->right->right->numValue, -1)
+						);
+					} else {
+						yyerror("Redefined variable array");
+					}
+				}
+
+
 				var = var->right;
 			}
 		}
+
+		
 
 		curr = curr->right;
 	}

@@ -4,7 +4,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-enum NodeType { tokenOp, tokenKey, tokenVar, tokenVal, tokenArr, tokenStr, tokenFloat };
+enum NodeType { tokenOp, tokenKey, tokenVar, tokenVal, tokenArr, tokenStr, tokenFloat, token2d };
 
 struct TreeNode {
     TreeNode* left;

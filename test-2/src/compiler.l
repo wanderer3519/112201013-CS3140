@@ -29,6 +29,9 @@
     extern unordered_map<string, pair<int, vector<int>> >mem;
     extern unordered_map<string, pair<float, vector<float>> >fmem;
 
+    extern unordered_map< string, vector< vector<int> > > mem2d;
+	extern unordered_map< string, vector< vector<float> >> fmem2d;
+
 %}
 
 
@@ -106,6 +109,7 @@ false			{ return F; }
 
 int yywrap(){
     printf("\nDONE PARSING...\nPrinting symbol table\n");
+    cout << "INT MEMORY\n";
     for(auto p: mem){
         /* P: pair of string, pair<int, vector<int>> */
 
@@ -125,6 +129,7 @@ int yywrap(){
             cout << val << '\n';
     }
 
+    cout << "FLOAT MEMORY" << '\n';
     for(auto p: fmem){
         /* P: pair of string, pair<int, vector<int>> */
 
@@ -135,13 +140,48 @@ int yywrap(){
         cout << "fmem[" << key << "] = ";
 
         if(!p.second.second.empty()){
-            for(auto num: p.second.second){
+            /* for(auto num: p.second.second){
                 cout <<  num << ", ";        
             }
-            cout << "NULL\n";
+            cout << "NULL\n"; */
+            for(int i = 0; i < p.second.second.size() - 1; i++){
+                cout << p.second.second[i] << ' ';
+            }
+            cout << '\n';
         }
         else
             cout << val << '\n';
     }
+
+    cout << "2d INT mem\n";
+    for(auto p: mem2d){
+        string arrName = p.first;
+        vector<vector<int>> arr = p.second;
+
+        cout << arrName << '\n';
+        for(int r = 0; r < arr.size(); r++){
+            for(int c = 0; c < arr[0].size(); c++){
+                cout << arr[r][c] << ' ';
+            }
+            cout << '\n';
+        }
+        cout << '\n';
+    }
+
+    cout << "2d FLOAT mem\n";
+    for(auto p: fmem2d){
+        string arrName = p.first;
+         vector<vector<float>> arr = p.second;
+        
+        cout << arrName << '\n';
+        for(int r = 0; r < arr.size(); r++){
+            for(int c = 0; c < arr[0].size(); c++){
+                cout << arr[r][c] << ' ';
+            }
+            cout << '\n';
+        }
+        cout << '\n';
+    }
+
     return 1;
 }

@@ -26,6 +26,9 @@
 	unordered_map<string, pair<int, vector<int>> >mem;
 	unordered_map<string, pair<float, vector<float>> >fmem;
 
+	unordered_map< string, vector< vector<int> > > mem2d;
+	unordered_map< string, vector< vector<float> >> fmem2d;
+
 	int yylex();
 	void yyerror(const char* s);
 	extern FILE* yyin;
@@ -143,6 +146,11 @@ Gid	:	VAR	{
 			// 	yyerror("Redefined variable array");
 			// }
 		}
+	| VAR '[' NUM ']' '[' NUM ']' {
+			$$ = new TreeNode("2D-ARRAY", token2d, 
+			new TreeNode($1, tokenVar), 
+			new TreeNode("X", tokenKey, new TreeNode($3, tokenVal), new TreeNode($6, tokenVal)));
+	}
 	;
 	
 /* 
@@ -379,6 +387,7 @@ str_expr:
 var_expr:	
 	VAR	{ $$ = new TreeNode($1, tokenVar); }
 	|	var_expr '[' expr ']'	{ $$ = new TreeNode("ARRAY", tokenArr, $1, $3); }
+	| 	var_expr '[' expr ']' '[' expr ']' { $$ = new TreeNode("2D-ARRAY", token2d, $1, new TreeNode("X", tokenKey, $3, $6)); }
 	;
 %%
 

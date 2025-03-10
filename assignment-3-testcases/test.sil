@@ -1,5 +1,5 @@
 begindecl
-integer i, var[10];
+integer var[10], i;
 enddecl
 
 begin
