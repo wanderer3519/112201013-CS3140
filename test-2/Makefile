@@ -8,4 +8,4 @@ clean:
 	rm -rf *.tab.c *.yy.c *.tab.[hc] bin/
 
 rebuild: clean all
-	cat tests/test1.sil | bin/compiler
+	cat tests/test1a.sil | bin/compiler

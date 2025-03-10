@@ -27,6 +27,8 @@
     extern YYSTYPE yylval;
     extern void yyerror(const char* s);
     extern unordered_map<string, pair<int, vector<int>> >mem;
+    extern unordered_map<string, pair<float, vector<float>> >fmem;
+
 %}
 
 
@@ -45,7 +47,8 @@ read			{ return READ; }
 write			{ return WRITE; }	
 integer			{ return T_INT; }	
 boolean			{ return T_BOOL; }
-begindecl			{ return DECL; }
+float           { return T_FLOAT; }
+begindecl		{ return DECL; }
 enddecl			{ return ENDDECL; }
 
 if				{ return IF; }
@@ -68,9 +71,14 @@ true			{ return T; }
 false			{ return F; }
 
 {digit}+		{ 
-        yylval.val = atof(yytext);
+        yylval.val = atoi(yytext);
         return NUM; 
     } /* no float support */
+
+{digit}+(\.{digit}+) {
+    yylval.fval = atof(yytext);
+    return FLOAT;
+}
 
 [\-\+*/=,;()><\{\}\[\]\%]     { return yytext[0]; }
 
@@ -91,11 +99,8 @@ false			{ return F; }
 .	{ 
         // char* str = "Invalid character";
         yyerror("Invalid char"); 
-    
     }		
 	
-
-  
 %%
 
 
@@ -109,6 +114,25 @@ int yywrap(){
         int val = p.second.first;
 
         cout << "mem[" << key << "] = ";
+
+        if(!p.second.second.empty()){
+            for(auto num: p.second.second){
+                cout <<  num << ", ";        
+            }
+            cout << "NULL\n";
+        }
+        else
+            cout << val << '\n';
+    }
+
+    for(auto p: fmem){
+        /* P: pair of string, pair<int, vector<int>> */
+
+        string key = p.first;
+        /* int key1 = p.first; */
+        float val = p.second.first;
+
+        cout << "fmem[" << key << "] = ";
 
         if(!p.second.second.empty()){
             for(auto num: p.second.second){

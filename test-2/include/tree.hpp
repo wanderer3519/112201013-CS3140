@@ -4,7 +4,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-enum NodeType { tokenOp, tokenKey, tokenVar, tokenVal, tokenArr, tokenStr };
+enum NodeType { tokenOp, tokenKey, tokenVar, tokenVal, tokenArr, tokenStr, tokenFloat };
 
 struct TreeNode {
     TreeNode* left;
@@ -14,7 +14,7 @@ struct TreeNode {
     
     string name;     // For operators and keywords
     int numValue;   // For numbers
-    
+    float floatValue;
 
     // Constructor for operator or keyword nodes or variable
     TreeNode(const char* nodeName, NodeType _type, TreeNode* _left = nullptr, TreeNode* _right = nullptr){
@@ -41,14 +41,22 @@ struct TreeNode {
         
     }
 
-
+    TreeNode(float _value, NodeType _type, TreeNode* _left = nullptr, TreeNode* _right = nullptr){
+        if(_type == tokenFloat){
+            left = _left;
+            right = _right;
+            floatValue = _value;
+            token = _type;
+        }
+    }
 };
 
 
 void print_level(TreeNode* root, int t_level, int p_level, int height);
 int height(TreeNode* root);
 void print_tree(TreeNode* t);
-int evaluate_expr(TreeNode* root);
+float evaluate_expr(TreeNode* root);
 void execute_stmt(TreeNode* root);
+void declare_vars(TreeNode* root);
 
 #endif

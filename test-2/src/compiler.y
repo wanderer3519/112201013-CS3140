@@ -24,6 +24,7 @@
 	using namespace std;
 
 	unordered_map<string, pair<int, vector<int>> >mem;
+	unordered_map<string, pair<float, vector<float>> >fmem;
 
 	int yylex();
 	void yyerror(const char* s);
@@ -35,6 +36,7 @@
 
 %union{
 	int val;
+	float fval;
 	const char* name;
 	TreeNode* node;
 	char endop;
@@ -47,7 +49,7 @@
 %type <node> Gdecl Glist read_stmt write_stmt statement stmt_list func_stmt cond_stmt
 
 %token BEG END
-%token <val> T_INT T_BOOL
+%token <val> T_INT T_BOOL T_FLOAT
 %token READ WRITE
 %token DECL ENDDECL
 %token <val> NUM
@@ -58,6 +60,8 @@
 %token WHILE DO ENDWHILE FOR 
 %token <val> T F 
 %token MAIN RETURN
+
+%token <fval> FLOAT
 
 
 
@@ -76,12 +80,15 @@ Prog:	Gdecl_sec Fdef_sec MainBlock
 Gdecl_sec:	DECL Gdecl_list ENDDECL { 
 		// printf("You are right\n");
 		print_tree($2); // here
+		declare_vars($2);
  	}
 	;
 	
 Gdecl_list:  { $$ = nullptr; }
 	| 	Gdecl Gdecl_list { 
 			$$ = new TreeNode("DECL", tokenKey, $1, $2); 
+			// function to declare vars
+			// declare_vars($$);
 		}
 	;
 	
@@ -101,6 +108,12 @@ Gdecl:	ret_type Glist  ';' {
 ret_type:	T_INT		{ 
 		$$ = new TreeNode("INT", tokenKey); 
 	}
+	| T_FLOAT {
+		$$ = new TreeNode("FLOAT", tokenKey);
+	}
+	| T_BOOL {
+		$$ = new TreeNode("BOOL", tokenKey);
+	}
 	;
 	
 Glist:	Gid { $$ = $1; }
@@ -114,21 +127,21 @@ Glist:	Gid { $$ = $1; }
 
 Gid	:	VAR	{
 			$$ = new TreeNode($1, tokenVar); 
-			if(!mem.count($1))
-				mem[$1] = {-1, {}};
-			else
-				yyerror("Redefined variable var");
+			// if(!mem.count($1))
+			// 	mem[$1] = {-1, {}};
+			// else
+			// 	yyerror("Redefined variable var");
 		}
 	|	VAR '[' NUM ']'	{
 			$$ = new TreeNode("ARRAY", tokenArr, new TreeNode($1, tokenVar), new TreeNode($3, tokenVal));
 
-			if(!mem.count($1)){
-				mem[$1].first = 0;
-				mem[$1].second = vector<int>($3, -1);
-			}
-			else{
-				yyerror("Redefined variable array");
-			}
+			// if(!mem.count($1)){
+			// 	mem[$1].first = 0;
+			// 	mem[$1].second = vector<int>($3, -1);
+			// }
+			// else{
+			// 	yyerror("Redefined variable array");
+			// }
 		}
 	;
 	
@@ -325,7 +338,9 @@ para:
 
 expr:	
 	NUM 			{ $$ = new TreeNode($1, tokenVal); }
-	|	'-' NUM			{ $$ = new TreeNode( "-", tokenOp, nullptr, new TreeNode($2, tokenVal)); }
+	|	'-' NUM		{ $$ = new TreeNode( "-", tokenOp, nullptr, new TreeNode($2, tokenVal)); }
+	| FLOAT 		{ $$ = new TreeNode($1, tokenFloat); }
+	| '-' FLOAT 	{ $$ = new TreeNode( "-", tokenOp, nullptr, new TreeNode($2, tokenFloat)); }
 	|	var_expr		{ $$ = $1; }
 	|	T			{ $$ = new TreeNode($1, tokenKey); }
 	|	F			{ $$ = new TreeNode($1, tokenKey); }
