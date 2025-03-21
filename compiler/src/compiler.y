@@ -58,7 +58,7 @@
 %token WHILE DO ENDWHILE FOR 
 %token <val> T F 
 %token MAIN RETURN
-
+%token STRING
 
 
 %left '<' '>'

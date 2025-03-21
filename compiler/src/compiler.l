@@ -32,8 +32,10 @@
 
 digit	[0-9]
 letter	[a-zA-Z]
+number [0-9]+(\.[0-9]+)?
 start \/\* 
 end  \*\/ 
+string \"[^\"]*\"
 
 %%
 [ \t\n]+			;
@@ -81,8 +83,14 @@ false			{ return F; }
         return VAR; 
     }
 
-			
-["]             { return yytext[0]; }
+
+{string} {
+        yylval.name = strdup(yytext + 1);
+        yylval.name[strlen(yytext) - 1] = '\0';
+        return STRING;
+    }
+
+
 
 \/\/(.*) ; /* Regular expression for single line comment */   
 
