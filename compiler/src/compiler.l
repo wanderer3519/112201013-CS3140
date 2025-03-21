@@ -37,6 +37,7 @@ start \/\*
 end  \*\/ 
 string \"[^\"]*\"
 
+
 %%
 [ \t\n]+			;
 main			{ return MAIN; }		
@@ -66,27 +67,25 @@ for 			{ return FOR; }
 AND				{ return LOGICAL_AND; }	
 OR				{ return LOGICAL_OR; }
 NOT				{ return LOGICAL_NOT; }
-true			{ return T; }	
-false			{ return F; }
+true			{ yylval.val = 1; return T; }	
+false			{ yylval.val = 0; return F; }
+break           { return BREAK; }
 
 {digit}+		{ 
-        yylval.val = atof(yytext);
+        yylval.val = atoi(yytext);
         return NUM; 
     } /* no float support */
 
 [\-\+*/=,;()><\{\}\[\]\%]     { return yytext[0]; }
 
 {letter}({letter}|{digit})*	{ 
-        // printf("VARLEX: %s\n", yytext);
         yylval.name = strdup(yytext);
-        // printf("VARLEX: %s\n", yylval.name);
         return VAR; 
     }
 
 
 {string} {
-        yylval.name = strdup(yytext + 1);
-        yylval.name[strlen(yytext) - 1] = '\0';
+        yylval.name = strndup(yytext + 1, strlen(yytext) - 2);
         return STRING;
     }
 
@@ -108,12 +107,12 @@ false			{ return F; }
 
 
 int yywrap(){
-    printf("\nDONE PARSING...\nPrinting symbol table\n");
-    for(auto p: mem){
-        /* P: pair of string, pair<int, vector<int>> */
+    printf("\nPrinting symbol table\n");
+    /* for(auto p: mem){
+        // P: pair of string, pair<int, vector<int>> 
 
         string key = p.first;
-        /* int key1 = p.first; */
+        // int key1 = p.first;
         int val = p.second.first;
 
         cout << "mem[" << key << "] = ";
@@ -126,6 +125,10 @@ int yywrap(){
         }
         else
             cout << val << '\n';
-    }
+    } */
+
+    print_symbol_table(mem);
+
+
     return 1;
 }

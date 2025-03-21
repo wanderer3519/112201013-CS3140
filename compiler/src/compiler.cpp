@@ -1,5 +1,7 @@
 #include "tree.hpp"
 #include <bits/stdc++.h>
+#include <iomanip>
+
 using namespace std;
 
 extern void yyerror(const char* s);
@@ -101,6 +103,56 @@ void print_tree(TreeNode* t) {
 	return;
 }
 
+
+
+
+
+
+void print_proper(TreeNode* root, string prefix, bool isLeft) {
+    if (!root) return;
+
+    // Print current node
+    cout << prefix;
+    cout << (isLeft ? "├── " : "└── ");
+
+    // Print node label with full operator handling
+    if (root->token == tokenOp) {
+        if (root->name == "+") cout << "PLUS";
+        else if (root->name == "-") cout << "MINUS";
+        else if (root->name == "*") cout << "MULT";
+        else if (root->name == "/") cout << "DIV";
+        // else if (root->name == "%") cout << "MOD";
+        else if (root->name == "=") cout << "ASSIGN";
+        else if (root->name == "==") cout << "EQUAL";
+        else if (root->name == "!=") cout << "NOT_EQUAL";
+        else if (root->name == "<") cout << "LESS_THAN";
+        else if (root->name == "<=") cout << "LESS_EQUAL";
+        else if (root->name == ">") cout << "GREATER_THAN";
+        else if (root->name == ">=") cout << "GREATER_EQUAL";
+        else if (root->name == "&&") cout << "LOGICAL_AND";
+        else if (root->name == "||") cout << "LOGICAL_OR";
+        else if (root->name == "!") cout << "LOGICAL_NOT";
+        else cout << root->name;  // Fallback case for unknown ops
+    } 
+    else if (root->token == tokenVal) {
+        cout << root->numValue;
+    } 
+    else {
+        cout << root->name;
+    }
+    cout << endl;
+
+    // Construct the prefix for child nodes
+    string newPrefix = prefix + (isLeft ? "│   " : "    ");
+
+    // Print left and right children
+    if (root->left || root->right) {
+        print_proper(root->left, newPrefix, true);
+        print_proper(root->right, newPrefix, false);
+    }
+}
+
+
 int evaluate_expr(TreeNode* root){
 	if(!root) return 0;
 	if(root->token == tokenVal)
@@ -115,27 +167,67 @@ int evaluate_expr(TreeNode* root){
 	else if(root->token == tokenVar){
 		return mem[root->name].first;
 	}
+
+	else if(root->token == tokenArr){
+		string name = root->left->name;
+		int ind = root->right->numValue;
+		
+		return mem[name].second[ind];
+	}
+
 	int left_eval = evaluate_expr(root->left);
 	int right_eval = evaluate_expr(root->right);
 	int ans = 0;
-	switch(root->name[0]){
-		case '+': ans = left_eval + right_eval; break;
-		case '-': ans = left_eval - right_eval; break;
-		case '*': ans = left_eval * right_eval; break;
-		case '/':
-			if(right_eval == 0){
-				// char* str = "Division by zero";
-				yyerror("Division by zero");
-				exit(0);
-			} 
-			ans = left_eval / right_eval;
-		break;
+	// switch(root->name[0]){
+	// 	case '+': ans = left_eval + right_eval; break;
+	// 	case '-': ans = left_eval - right_eval; break;
+	// 	case '*': ans = left_eval * right_eval; break;
+	// 	case '/':
+	// 		if(right_eval == 0){
+	// 			// char* str = "Division by zero";
+	// 			yyerror("Division by zero");
+	// 			exit(0);
+	// 		} 
+	// 		ans = left_eval / right_eval;
+	// 	break;
         
-        case '>': ans = left_eval > right_eval; break;
-        case '<': ans = left_eval < right_eval; break;
+    //     case '>': ans = left_eval > right_eval; break;
+    //     case '<': ans = left_eval < right_eval; break;
+	// }
+
+	if (root->name == "+") {
+		ans = left_eval + right_eval;
+	} else if (root->name == "-") {
+		ans = left_eval - right_eval;
+	} else if (root->name == "*") {
+		ans = left_eval * right_eval;
+	} else if (root->name == "/") {
+		if (right_eval == 0) {
+			yyerror("Division by zero");
+			exit(0);
+		}
+		ans = left_eval / right_eval;
+	} else if (root->name == ">") {
+		ans = left_eval > right_eval;
+	} else if (root->name == "<") {
+		ans = left_eval < right_eval;
+	} else if (root->name == "==") {
+		ans = left_eval == right_eval;
+	} else if (root->name == "!=") {
+		ans = left_eval != right_eval;
+	} else {
+		cout << root->name << '\n';
+		yyerror("Unknown operator");
+		exit(0);
 	}
+	
+
+
 	return ans;
 }
+
+
+bool breakFlag = false; // Global flag for break handling
 
 void execute_stmt(TreeNode* root){
     if(!root) return;
@@ -166,18 +258,26 @@ void execute_stmt(TreeNode* root){
                 int val = evaluate_expr(root->right->right);
                 cout << mem[ind].second[val] << '\n'; 
             }
+
+			else if(root->right->token == tokenStr){
+				cout << root->right->name << '\n';
+			}
         } 
         
     }
 
     else if(root->name == "="){
         if(root->left->token == tokenVar && !mem.count(root->left->name)){
-			yyerror("Undefined variable in assign");
+			// print_symbol_table(mem);
+			yyerror("Undefined variable var in assign");
+			
 			exit(0);
 		} 
 
 		if(root->left->token == tokenArr && !mem.count(root->left->left->name)){
-			yyerror("Undefined variable in assign");
+			// print_symbol_table(mem);
+			yyerror("Undefined variable arr in assign");
+			
 			exit(0);
 		}
 		
@@ -197,7 +297,7 @@ void execute_stmt(TreeNode* root){
 
     else if(root->name == "IF_ELSE") {
         int exp = evaluate_expr(root->left);
-		printf("EXP: %d\n", exp);
+		// printf("EXP: %d\n", exp);
 		if(exp){
 			// curr is the stmt_list
 			TreeNode* curr = root->right->left;
@@ -225,12 +325,23 @@ void execute_stmt(TreeNode* root){
 		int flag = evaluate_expr(cond);
 		while(flag){
 			// cout << "Hello1\n";
+			if (breakFlag) { // Stop execution if break is encountered
+                breakFlag = false; // Reset for future loops
+                break;
+            }
+
 			TreeNode* stlist = root->right->right;
 
 			while(stlist){
 				execute_stmt(stlist->left);
+				if (breakFlag) break;
 				stlist = stlist->right;
 			}
+
+			if (breakFlag) { // Stop loop execution after breaking
+                breakFlag = false;
+                break;
+            }
 
 			execute_stmt(root->right->left); // execute assign
 			cond = root->left->right;
@@ -239,7 +350,81 @@ void execute_stmt(TreeNode* root){
 	}
 	else if(root->name == "STMT_LIST"){
 		execute_stmt(root->left);
-		print_tree(root->left);
+		// print_proper(root->left, "", true);
 		execute_stmt(root->right);
 	}
+	else if(root->name == "BREAK"){
+		breakFlag = true;
+	}
+}
+
+void declare_vars(TreeNode* root){
+	TreeNode* curr = root;
+
+	while(curr){
+		if(curr->left->name == "INT"){
+			TreeNode* var = curr->left->right;
+			
+			while(var){
+				if(var->token == tokenVar){
+					if(!mem.count(var->name))
+						mem[var->name] = {-1, {}};
+					else{
+						cout << mem.count(var->name) << '\n';
+						yyerror("Redefined variable var: INT");
+						// exit(1);
+					}	
+						
+				}
+				else if(var->token == tokenArr){
+					string name = var->left->left->name;
+					int size = var->left->right->numValue;
+
+					if(!mem.count(name)){
+						mem[name].first = 0;
+						mem[name].second = vector<int>(size, -1);
+					}
+					else{
+						yyerror("Redefined variable array");
+						// exit(1);
+					}
+				}
+				
+
+				var = var->right;
+			}
+		}
+
+		
+
+		curr = curr->right;
+	}
+}
+
+
+void print_symbol_table(const unordered_map<string, pair<int, vector<int>>>& mem) {
+    cout << "Symbol Table:\n";
+    cout << "---------------------------------\n";
+    cout << "| Variable  | Value  | References |\n";
+    cout << "---------------------------------\n";
+
+    for (const auto& entry : mem) {
+        const string& varName = entry.first;
+        int value = entry.second.first;
+        const vector<int>& references = entry.second.second;
+
+        cout << "| " << setw(9) << left << varName << " | "
+             << setw(6) << value << " | ";
+
+        if (references.empty()) {
+            cout << "None";
+        } else {
+            for (size_t i = 0; i < references.size(); i++) {
+                cout << references[i];
+                if (i != references.size() - 1) cout << ", ";
+            }
+        }
+        cout << " |\n";
+    }
+    cout << "---------------------------------\n";
 }

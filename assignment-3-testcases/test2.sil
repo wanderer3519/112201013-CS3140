@@ -3,12 +3,12 @@ integer var[5];
 integer var1;
 enddecl
 
-var[2] = 10;
+begin
+    var[2] = 126;
 
-
-if(var[2] > 11){
-    write(var[2]);
-}
-else{
-    write("Hello");
-}
+    if(var[2] > 11) then
+        write(var[2]);
+    else
+        write("Hello");
+    endif
+end

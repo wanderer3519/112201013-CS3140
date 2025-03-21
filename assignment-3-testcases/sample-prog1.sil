@@ -1,7 +1,7 @@
 begindecl
     integer array[10];
     integer key, i;
-    integer start, end, mid, result;
+    integer start, endvar, mid, result;
 enddecl
 
 begin
@@ -10,20 +10,28 @@ begin
     }
 
     start = 0;
-    end = 9;
+    endvar = 9;
     key = array[5];
 
-    for( ; start < end; ){
-        mid = (start + end) / 2;
+    for( ; start < endvar; ){
+        mid = (start + endvar) / 2;
         if(array[mid] == key) then
+            write("Here");
             result = mid;
             break;
         
         else 
+            write("mid");
+            write(mid);
+            
             if (array[mid] > key) then
                 start = mid + 1;
+                write("start");
+                write(start);
             else 
-                end = mid - 1;
+                endvar = mid - 1;
+                write("end");
+                write(endvar);
             endif
         endif
     }

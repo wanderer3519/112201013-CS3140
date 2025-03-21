@@ -1,5 +1,6 @@
 begindecl
-integer var[10], i;
+integer i, j;
+integer k;
 enddecl
 
 begin

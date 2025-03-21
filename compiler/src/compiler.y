@@ -58,7 +58,8 @@
 %token WHILE DO ENDWHILE FOR 
 %token <val> T F 
 %token MAIN RETURN
-%token STRING
+%token <name> STRING
+%token BREAK
 
 
 %left '<' '>'
@@ -75,7 +76,8 @@ Prog:	Gdecl_sec Fdef_sec MainBlock
 
 Gdecl_sec:	DECL Gdecl_list ENDDECL { 
 		// printf("You are right\n");
-		print_tree($2); // here
+		print_proper($2); // here
+		declare_vars($2);
  	}
 	;
 	
@@ -114,21 +116,22 @@ Glist:	Gid { $$ = $1; }
 
 Gid	:	VAR	{
 			$$ = new TreeNode($1, tokenVar); 
-			if(!mem.count($1))
-				mem[$1] = {-1, {}};
-			else
-				yyerror("Redefined variable var");
+			// if(!mem.count($1))
+			// 	mem[$1] = {-1, {}};
+			// else
+			// 	yyerror("Redefined variable var");
 		}
 	|	VAR '[' NUM ']'	{
-			$$ = new TreeNode("ARRAY", tokenArr, new TreeNode($1, tokenVar), new TreeNode($3, tokenVal));
+			$$ = new TreeNode("ARRAY", tokenArr, 
+				 new TreeNode("X", tokenKey, new TreeNode($1, tokenVar),  new TreeNode($3, tokenVal)), nullptr);
 
-			if(!mem.count($1)){
-				mem[$1].first = 0;
-				mem[$1].second = vector<int>($3, -1);
-			}
-			else{
-				yyerror("Redefined variable array");
-			}
+			// if(!mem.count($1)){
+			// 	mem[$1].first = 0;
+			// 	mem[$1].second = vector<int>($3, -1);
+			// }
+			// else{
+			// 	yyerror("Redefined variable array");
+			// }
 		}
 	;
 	
@@ -192,7 +195,14 @@ ret_stmt:
 		
 MainBlock: 	
 	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }			  
-	| BEG stmt_list END { execute_stmt($2); }
+	| BEG stmt_list END { 
+			cout << '\n';
+			print_proper($2);
+
+			cout << "\nDone symbol table: Now executing the program...\n";
+			cout << "Program Output:\n";
+			execute_stmt($2);
+		}
 	;
 	
 main:	MAIN		{ 					}
@@ -236,12 +246,13 @@ statement:
 	|	write_stmt  ';'		{ $$ = $1; }
 	|	cond_stmt 			{ $$ = $1; }
 	|	func_stmt  ';'		{ }
+	| 	BREAK ';' { $$ = new TreeNode("BREAK", tokenKey); }
 	;
 
 read_stmt:	
 	READ '(' var_expr ')' { 
 			$$ = new TreeNode("READ", tokenKey, nullptr, $3); 
-			print_tree($$); 
+			// print_tree($$); 
 		}
 	;
 
@@ -257,6 +268,7 @@ write_stmt:
 			// print_tree($$); 
 			// execute_stmt($$);
 		}
+	| WRITE '(' STRING ')' { $$ = new TreeNode("WRITE", tokenKey, nullptr, new TreeNode($3, tokenStr)); }
 	;
 
 /* use this */
@@ -365,7 +377,7 @@ var_expr:
 %%
 
 void yyerror(const char* s){
-
+	print_symbol_table(mem);
    	fprintf(stderr, "Error: %s\n", s);
 }
 

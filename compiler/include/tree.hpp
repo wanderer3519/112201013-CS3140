@@ -50,5 +50,8 @@ int height(TreeNode* root);
 void print_tree(TreeNode* t);
 int evaluate_expr(TreeNode* root);
 void execute_stmt(TreeNode* root);
+void print_proper(TreeNode* root, string prefix = "", bool isLeft = true);
+void print_symbol_table(const unordered_map<string, pair<int, vector<int>>>& mem);
+void declare_vars(TreeNode* root);
 
 #endif
