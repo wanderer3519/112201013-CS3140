@@ -21,8 +21,9 @@
     using namespace std;
     
     
-    int Lineno;
+
     int wflag;
+    extern int lineno;
 
     extern YYSTYPE yylval;
     extern void yyerror(const char* s);
@@ -39,7 +40,8 @@ string \"[^\"]*\"
 
 
 %%
-[ \t\n]+			;
+[ \t]+		    ;
+[\n]           { lineno++; }
 main			{ return MAIN; }		
 return 			{ return RETURN; }
 begin			{ return BEG; }	

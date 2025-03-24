@@ -24,12 +24,14 @@
 	using namespace std;
 
 	unordered_map<string, pair<int, vector<int>> >mem;
+	unordered_set<string> boolVars;
 
 	int yylex();
 	void yyerror(const char* s);
 	extern FILE* yyin;
     // int i;
 
+	int lineno;
 	
 %}
 
@@ -97,6 +99,7 @@ Gdecl_list:  { $$ = nullptr; }
 Gdecl:	ret_type Glist  ';' {
 			$$ = $1;
 			$$->right = $2;
+			// lineno++;
 		}
 		;
 	
@@ -108,7 +111,9 @@ ret_type:	T_INT		{
 	}
 	;
 	
-Glist:	Gid { $$ = $1; }
+Glist:	Gid { 
+		$$ = $1; 
+	}
 	| 	func {  }
 	|	Gid ',' Glist  { 
 			$$ = $1;
@@ -381,7 +386,7 @@ var_expr:
 
 void yyerror(const char* s){
 	print_symbol_table(mem);
-   	fprintf(stderr, "Error: %s\n", s);
+   	fprintf(stderr, "Error: %s at line number: %d \n", s, lineno);
 }
 
 

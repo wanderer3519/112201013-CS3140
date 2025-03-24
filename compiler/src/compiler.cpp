@@ -6,6 +6,7 @@ using namespace std;
 
 extern void yyerror(const char *s);
 extern unordered_map<string, pair<int, vector<int>>> mem;
+extern unordered_set<string> boolVars;
 
 /*	Helper function to print one level of a binary tree */
 void print_level(TreeNode *root, int t_level, int p_level, int height)
@@ -332,7 +333,6 @@ void execute_stmt(TreeNode *root)
 		{
 			// print_symbol_table(mem);
 			yyerror("Undefined variable var in assign");
-
 			exit(0);
 		}
 
@@ -340,10 +340,29 @@ void execute_stmt(TreeNode *root)
 		{
 			// print_symbol_table(mem);
 			yyerror("Undefined variable arr in assign");
-
 			exit(0);
 		}
 
+		string name = "";
+		if(root->left->token == tokenVal){
+			name = root->left->name;
+		}
+		else if(root->left->token == tokenArr){
+			name = root->left->left->name;
+		}
+
+		// string name = (root->left->token == tokenVal) ? root->left->name : root->left->left->name;
+		
+		if(boolVars.count(name)){
+			TreeNode* rexp = root->right;
+			int rval = evaluate_expr(rexp);
+
+			if(rval != 0 && rval != 1){
+				yyerror("Type mismatch: Assignment of type 'integer' to type 'boolean'");
+				exit(0);
+			}
+		}
+		
 		int x = evaluate_expr(root->right);
 
 		if (root->left->token == tokenVar)
@@ -485,8 +504,11 @@ void declare_vars(TreeNode *root)
 			{
 				if (var->token == tokenVar)
 				{
-					if (!mem.count(var->name))
+					if (!mem.count(var->name)){
 						mem[var->name] = {0, {}};
+						boolVars.insert(var->name);
+					}
+						
 					else
 					{
 						cout << mem.count(var->name) << '\n';
@@ -503,6 +525,7 @@ void declare_vars(TreeNode *root)
 					{
 						mem[name].first = 0;
 						mem[name].second = vector<int>(size, -1);
+						boolVars.insert(name);
 					}
 					else
 					{
