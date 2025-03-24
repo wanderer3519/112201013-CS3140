@@ -103,6 +103,9 @@ Gdecl:	ret_type Glist  ';' {
 ret_type:	T_INT		{ 
 		$$ = new TreeNode("INT", tokenKey); 
 	}
+	| T_BOOL {
+		$$ = new TreeNode("BOOL", tokenKey);
+	}
 	;
 	
 Glist:	Gid { $$ = $1; }
@@ -336,8 +339,8 @@ expr:
 	NUM 			{ $$ = new TreeNode($1, tokenVal); }
 	|	'-' NUM			{ $$ = new TreeNode( "-", tokenOp, nullptr, new TreeNode($2, tokenVal)); }
 	|	var_expr		{ $$ = $1; }
-	|	T			{ $$ = new TreeNode($1, tokenKey); }
-	|	F			{ $$ = new TreeNode($1, tokenKey); }
+	|	T			{ $$ = new TreeNode($1, tokenVal); }
+	|	F			{ $$ = new TreeNode($1, tokenVal); }
 	|	'(' expr ')'		{ $$ = $2; }
 	|	expr '+' expr 		{ $$ = new TreeNode( "+", tokenOp, $1, $3); }
 	|	expr '-' expr	 	{ $$ = new TreeNode( "-", tokenOp, $1, $3); }

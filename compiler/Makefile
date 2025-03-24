@@ -8,4 +8,4 @@ clean:
 	rm -rf *.tab.c *.yy.c *.tab.[hc] bin/
 
 rebuild: clean all
-	bin/compiler ../assignment-3-testcases/gpt.sil > tree.txt
+	bin/compiler ../assignment-3-testcases/my-test.sil > tree.txt
