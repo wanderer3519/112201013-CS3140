@@ -25,11 +25,13 @@
 
 	unordered_map<string, pair<int, vector<int>> >mem;
 	unordered_set<string> boolVars;
+	// TreeNode* root;
 
 	int yylex();
 	void yyerror(const char* s);
 	extern FILE* yyin;
     // int i;
+
 
 	int lineno;
 	
@@ -204,6 +206,7 @@ ret_stmt:
 MainBlock: 	
 	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }			  
 	| BEG stmt_list END { 
+			// root = $2;
 			cout << '\n';
 			print_proper($2);
 
