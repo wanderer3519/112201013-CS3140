@@ -6,8 +6,7 @@ all:
 	
 clean:
 	rm -rf *.tab.c *.yy.c *.tab.[hc] bin/
-	rm -rf ../outputs/*.txt
-	rm -rf ./outputs/*.txt
+	rm -rf ./outputs/
 
 rebuild: clean all
 	mkdir -p ./outputs

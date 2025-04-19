@@ -9,9 +9,89 @@ ofstream outputFileMips("./outputs/mips.txt");
 #define cout outputFileMips
 
 
+extern void yyerror(const char *s);
+extern unordered_map<string, pair<int, vector<int>>> mem;
+
 /**
  * Corrected MIPS code generation for FOR_STMT and other constructs.
  */
+
+
+void generate_expr(TreeNode* root){
+    if (!root)
+		return;
+	if (root->token == tokenVal){
+        cout << "li $";
+    }	
+
+
+	else if (root->token == tokenVar && !mem.count(root->name))
+	{
+		
+    }
+	else if (root->token == tokenVar)
+	{
+	
+	}
+
+	else if (root->token == tokenArr)
+	{
+		
+	}
+
+
+	if (root->name == "+")
+	{
+		
+	}
+	else if (root->name == "-")
+	{
+		
+	}
+	else if (root->name == "*")
+	{
+		
+	}
+	else if (root->name == "/")
+	{
+		
+	}
+	else if (root->name == "%")
+	{
+		
+	}
+	else if (root->name == ">")
+	{
+		
+	}
+	else if (root->name == "<")
+	{
+		
+	}
+	else if (root->name == "==")
+	{
+		
+	}
+	else if (root->name == "!=")
+	{
+		
+	}
+	else if (root->name == ">=")
+	{
+		
+	}
+	else if (root->name == "<=")
+	{
+		
+	}
+	else
+	{
+		cout << root->name << '\n';
+		
+	}
+
+	return;
+}
 
 void generate_for_stmt(TreeNode* root) {
     cout << "# MIPS code for FOR_STMT" << endl;
@@ -22,7 +102,7 @@ void generate_for_stmt(TreeNode* root) {
     cout << "FOR_START:" << endl;
 
     // Condition
-    print_code_2(root->left->right); // Condition expression
+    generate_expr(root->left->right); // Condition expression
     cout << "beqz $t0, FOR_END" << endl; // Exit loop if condition is false
 
     // Loop body
@@ -39,7 +119,7 @@ void generate_if_else(TreeNode* root) {
     cout << "# MIPS code for IF_ELSE" << endl;
 
     // Condition
-    print_code_2(root->left); // Evaluate condition
+    generate_expr(root->left); // Evaluate condition
     cout << "beqz $t0, ELSE_LABEL" << endl; // Branch to ELSE if condition is false
 
     // IF block
@@ -55,13 +135,15 @@ void generate_if_else(TreeNode* root) {
 
 void generate_assignment(TreeNode* root) {
     cout << "# MIPS code for ASSIGNMENT" << endl;
-    print_code_2(root->right); // Evaluate right-hand side
+    generate_expr(root->right); // Evaluate right-hand side
     cout << "sw $t0, " << root->left->numValue << "($sp)" << endl; // Store value in memory
 }
 
 void generate_write(TreeNode* root) {
     cout << "# MIPS code for WRITE" << endl;
-    print_code_2(root->left); // Evaluate expression
+    // print_code_2(root->left); // Evaluate expression
+    generate_expr(root->right); // Evaluate expression
+
     cout << "li $v0, 1" << endl; // Load syscall for print integer
     cout << "move $a0, $t0" << endl; // Move result to $a0
     cout << "syscall" << endl;

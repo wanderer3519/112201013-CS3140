@@ -1,0 +1,24 @@
+decl
+  integer array[5];
+  integer key, found;
+  integer index;
+enddecl
+
+begin
+  read(array[0], array[1], array[2]);
+  read(array[3], array[4]);
+  read(key);
+
+  found = 0;
+  for (index = 0; index < 4; index++) {
+    if (array[index] == key) {
+      found = 1;
+    }
+  }
+
+  if (found == 1) {
+    write(1);
+  } else {
+    write(0);
+  }
+end
