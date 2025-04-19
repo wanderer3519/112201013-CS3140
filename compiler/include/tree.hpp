@@ -53,5 +53,7 @@ void execute_stmt(TreeNode* root);
 void print_proper(TreeNode* root, string prefix = "", bool isLeft = true);
 void print_symbol_table(const unordered_map<string, pair<int, vector<int>>>& mem);
 void declare_vars(TreeNode* root);
+void print_code(TreeNode* root);
+void print_code_2(TreeNode* root);
 
 #endif

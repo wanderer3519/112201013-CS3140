@@ -6,6 +6,9 @@ all:
 	
 clean:
 	rm -rf *.tab.c *.yy.c *.tab.[hc] bin/
+	rm -rf ../outputs/*.txt
+	rm -rf ./outputs/*.txt
 
 rebuild: clean all
-	bin/compiler ../assignment-3-testcases/my-test.sil > tree.txt
+	mkdir -p ./outputs
+	bin/compiler ../assignment-3-testcases/my-test.sil

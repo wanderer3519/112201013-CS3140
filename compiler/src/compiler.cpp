@@ -2,6 +2,10 @@
 #include <bits/stdc++.h>
 #include <iomanip>
 
+ofstream outputFileTree("./outputs/tree.txt");
+
+#define cout outputFileTree
+
 using namespace std;
 
 extern void yyerror(const char *s);

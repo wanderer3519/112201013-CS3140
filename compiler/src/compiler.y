@@ -27,6 +27,9 @@
 	unordered_set<string> boolVars;
 	// TreeNode* root;
 
+	FILE* fout_tree;
+	FILE* fout_mips;
+
 	int yylex();
 	void yyerror(const char* s);
 	extern FILE* yyin;
@@ -209,6 +212,9 @@ MainBlock:
 			// root = $2;
 			cout << '\n';
 			print_proper($2);
+
+			cout << "\nDone symbol table: Now printing the MIPS code...\n";
+			print_code_2($2);
 
 			cout << "\nDone symbol table: Now executing the program...\n";
 			cout << "Program Output:\n";
@@ -395,7 +401,7 @@ void yyerror(const char* s){
 
 int main(int argc, char* argv[]){
 	if(argc != 2){
-		fprintf(stderr, "Use this cmd:\n$ %s <file_path>\n", argv[0]);
+		fprintf(stderr, "Use this cmd:\n$ %s <file_path> \n", argv[0]);
 		return 0;
 	}
 
@@ -406,6 +412,7 @@ int main(int argc, char* argv[]){
     }
 
 	yyin = file;
+
 
 	yyparse();
 	
