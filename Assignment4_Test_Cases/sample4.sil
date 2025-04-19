@@ -1,4 +1,4 @@
-decl
+begindecl
   integer array[5];
   integer key, found;
   integer index;

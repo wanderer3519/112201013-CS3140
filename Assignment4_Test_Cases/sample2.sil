@@ -1,4 +1,4 @@
-decl
+begindecl
   integer array[5];
   integer filter[3];
   integer convolution[3];

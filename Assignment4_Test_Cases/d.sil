@@ -1,6 +1,6 @@
 // Program to find the position of the first element in the array that doesn't equal to its index
 
-decl
+begindecl
   integer arr[16];
   integer len;
   integer i;

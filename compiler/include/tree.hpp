@@ -54,5 +54,7 @@ void print_symbol_table(const unordered_map<string, pair<int, vector<int>>>& mem
 void declare_vars(TreeNode* root);
 void print_code(TreeNode* root);
 void print_code_2(TreeNode* root);
+void generate_vars(TreeNode* root);
+void init_code(string filename);
 
 #endif

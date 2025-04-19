@@ -34,7 +34,7 @@
 	void yyerror(const char* s);
 	extern FILE* yyin;
     // int i;
-
+	string file_name;
 
 	int lineno;
 	
@@ -84,7 +84,11 @@ Prog:	Gdecl_sec Fdef_sec MainBlock
 Gdecl_sec:	DECL Gdecl_list ENDDECL { 
 		// printf("You are right\n");
 		print_proper($2); // here
-		declare_vars($2);
+		// declare_vars($2);
+		
+
+		init_code(file_name);
+		generate_vars($2);
  	}
 	;
 	
@@ -213,12 +217,12 @@ MainBlock:
 			cout << '\n';
 			print_proper($2);
 
+
 			cout << "\nDone symbol table: Now printing the MIPS code...\n";
+			
 			print_code_2($2);
 
-			cout << "\nDone symbol table: Now executing the program...\n";
-			cout << "Program Output:\n";
-			execute_stmt($2);
+			// execute_stmt($2);
 		}
 	;
 	
@@ -405,6 +409,7 @@ int main(int argc, char* argv[]){
 		return 0;
 	}
 
+	file_name = argv[1];
 	FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");

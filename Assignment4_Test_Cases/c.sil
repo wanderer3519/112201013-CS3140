@@ -1,6 +1,6 @@
 // Program to reverse an array
 
-decl
+begindecl
   integer arr[16];
   integer len;
   integer i;

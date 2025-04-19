@@ -1,4 +1,4 @@
-decl
+begindecl
 	integer a, b;
 enddecl
 

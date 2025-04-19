@@ -16,6 +16,88 @@ extern unordered_map<string, pair<int, vector<int>>> mem;
  * Corrected MIPS code generation for FOR_STMT and other constructs.
  */
 
+void init_code(string filename) {
+	cout << "\t.file\t1 \"" << filename << "\"" << endl;
+	cout << "\t.section .mdebug.abi32\n";
+	cout << "\t.previous\n";
+	cout << "\t.nan\tlegacy\n";
+	cout << "\t.module fp=32\n";
+	cout << "\t.module nooddspreg\n";
+	cout << "\t.text\n";
+}
+
+void generate_vars(TreeNode* root){
+	
+	cout << "# MIPS code for variable declarations" << endl;
+	TreeNode *curr = root;
+
+	while (curr)
+	{
+		if (curr->left->name == "INT")
+		{
+			TreeNode *var = curr->left->right;
+			int ct = 0;
+			while (var)
+			{
+				
+
+				if (var->token == tokenVar)
+				{
+					
+
+					if (!mem.count(var->name)){
+						mem[var->name] = {-1, {}};
+						
+						cout << "\t.globl\t" + var->name << '\n';
+						if(!ct){
+							cout << "\t.section\t\t.bss,\"aw\",@nobits\n";
+						}
+
+						cout << "\t.align\t2\n";
+						cout << "\t.type\t" + var->name + ", @object\n";
+						cout << "\t.size\t" + var->name + ", 4\n";
+						cout << var->name << ":\n";
+						cout << "\t.space\t4\n";
+					}
+						
+					else
+					{
+						cout << mem.count(var->name) << '\n';
+						yyerror("Redefined variable var: INT");
+						// exit(1);
+					}
+				}
+				else if (var->token == tokenArr)
+				{				
+					cout << "\t.globl\t" + var->name << '\n';
+					if(!ct){
+						cout << "\t.section\t\t.bss,\"aw\",@nobits\n";
+					}
+
+					cout << "\t.align\t2\n";
+					cout << "\t.type\t" + var->name + ", @object\n";
+					cout << "\t.size\t" + var->name + ", 4\n";
+					cout << var->name << ":\n";
+					cout << "\t.space\t" + to_string(4 * var->left->right->numValue) +  "\n";
+				}
+
+
+
+				var = var->right;
+				
+				if(!ct)
+					ct++;
+			}
+		}
+
+		else if (curr->left->name == "BOOL")
+		{
+			
+		}
+
+		curr = curr->right;
+	}
+}
 
 void generate_expr(TreeNode* root){
     if (!root)

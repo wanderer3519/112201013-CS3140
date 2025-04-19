@@ -1,0 +1,7 @@
+begindecl 
+integer a, b, c;
+enddecl
+
+begin
+    
+end

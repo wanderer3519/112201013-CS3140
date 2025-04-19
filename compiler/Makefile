@@ -10,4 +10,4 @@ clean:
 
 rebuild: clean all
 	mkdir -p ./outputs
-	bin/compiler ../assignment-3-testcases/my-test.sil
+	bin/compiler ../Assignment4_Test_Cases/test1.sil
