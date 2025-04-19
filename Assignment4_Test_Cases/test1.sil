@@ -3,5 +3,5 @@ integer a, b, c;
 enddecl
 
 begin
-    
+    read(a, b);
 end

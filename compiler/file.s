@@ -1,4 +1,4 @@
-	.file	1 "file.c"
+	.file	1 "test2.c"
 	.section .mdebug.abi32
 	.previous
 	.nan	legacy
@@ -6,13 +6,35 @@
 	.module	nooddspreg
 	.abicalls
 	.text
+	.globl	a
+	.section	.bss,"aw",@nobits
+	.align	2
+	.type	a, @object
+	.size	a, 4
+a:
+	.space	4
+	.globl	b
+	.align	2
+	.type	b, @object
+	.size	b, 4
+b:
+	.space	4
+	.globl	c
+	.align	2
+	.type	c, @object
+	.size	c, 4
+c:
+	.space	4
+	.globl	d
+	.align	2
+	.type	d, @object
+	.size	d, 4
+d:
+	.space	4
 	.rdata
 	.align	2
 $LC0:
-	.ascii	"Hello, World!\000"
-	.align	2
-$LC1:
-	.ascii	"This is a simple C program.\000"
+	.ascii	"%d%d%d\000"
 	.text
 	.align	2
 	.globl	main
@@ -33,20 +55,17 @@ main:
 	lui	$28,%hi(__gnu_local_gp)
 	addiu	$28,$28,%lo(__gnu_local_gp)
 	.cprestore	16
+	lui	$2,%hi(c)
+	addiu	$7,$2,%lo(c)
+	lui	$2,%hi(b)
+	addiu	$6,$2,%lo(b)
+	lui	$2,%hi(a)
+	addiu	$5,$2,%lo(a)
 	lui	$2,%hi($LC0)
 	addiu	$4,$2,%lo($LC0)
-	lw	$2,%call16(puts)($28)
+	lw	$2,%call16(__isoc99_scanf)($28)
 	move	$25,$2
-	.reloc	1f,R_MIPS_JALR,puts
-1:	jalr	$25
-	nop
-
-	lw	$28,16($fp)
-	lui	$2,%hi($LC1)
-	addiu	$4,$2,%lo($LC1)
-	lw	$2,%call16(puts)($28)
-	move	$25,$2
-	.reloc	1f,R_MIPS_JALR,puts
+	.reloc	1f,R_MIPS_JALR,__isoc99_scanf
 1:	jalr	$25
 	nop
 

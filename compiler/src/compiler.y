@@ -51,7 +51,7 @@
 /* %type <node> Gdecl_sec Gdecl_list */
 %type <node> arg_list1 arg_list arg func ret_type 
 %type <node> Gid expr var_expr func_call param_list para param_list1 str_expr assign_stmt Gdecl_list
-%type <node> Gdecl Glist read_stmt write_stmt statement stmt_list func_stmt cond_stmt
+%type <node> Gdecl Glist read_stmt write_stmt statement stmt_list func_stmt cond_stmt expr_list var_expr_list
 
 %token BEG END
 %token <val> T_INT T_BOOL
@@ -220,7 +220,7 @@ MainBlock:
 
 			cout << "\nDone symbol table: Now printing the MIPS code...\n";
 			
-			print_code_2($2);
+			print_code($2);
 
 			// execute_stmt($2);
 		}
@@ -271,14 +271,14 @@ statement:
 	;
 
 read_stmt:	
-	READ '(' var_expr ')' { 
+	READ '(' var_expr_list ')' { 
 			$$ = new TreeNode("READ", tokenKey, nullptr, $3); 
 			// print_tree($$); 
 		}
 	;
 
 write_stmt:	
-	WRITE '(' expr ')' 	{ 
+	WRITE '(' expr_list ')' 	{ 
 		$$ = new TreeNode("WRITE", tokenKey, nullptr, $3); 
 		// print_tree($$);
 		// execute_stmt($$);
@@ -296,8 +296,26 @@ write_stmt:
 assign_stmt:  { $$ = nullptr; }
 	| var_expr '=' expr 	{ 
 		$$ = new TreeNode("=", tokenOp, $1, $3);
-		// print_tree($$);
-		// execute_stmt($$);
+	}
+	| var_expr '+' '+' {
+		TreeNode* right = new TreeNode("+", tokenOp, $1, new TreeNode(1, tokenVal));
+		$$ = new TreeNode("=", tokenOp, $1, right);
+		
+	}
+	| var_expr '-' '-' {
+		TreeNode* right = new TreeNode("-", tokenOp, $1, new TreeNode(1, tokenVal));
+		$$ = new TreeNode("=", tokenOp, $1, right);
+		
+	}
+	| var_expr '+' '=' expr {
+		TreeNode* right = new TreeNode("+", tokenOp, $1, $4);
+		$$ = new TreeNode("=", tokenOp, $1, right);
+		
+	}
+	| var_expr '-' '=' expr {
+		TreeNode* right = new TreeNode("-", tokenOp, $1, $4);
+		$$ = new TreeNode("=", tokenOp, $1, right);
+		
 	}
 	;
 
@@ -351,6 +369,20 @@ param_list1:
 
 para:	
 	expr { $$ = $1; }
+	;
+
+expr_list:	
+	 expr { $$ = $1; }
+	|	expr ',' expr_list { 
+		$$ = new TreeNode("EXPR_LIST", tokenKey, $1, $3);
+	}
+	;
+
+var_expr_list:	
+	 var_expr { $$ = $1; }
+	|	var_expr ',' var_expr_list  { 
+		$$ = new TreeNode("EXPR_LIST", tokenKey, $1, $3);
+	}
 	;
 
 expr:	

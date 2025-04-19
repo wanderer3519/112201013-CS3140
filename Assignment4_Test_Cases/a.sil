@@ -4,7 +4,7 @@ begindecl
 enddecl
 
 begin
-  read(a, b);
+  read(a, b, c);
   write(a, b);
 
   read(a);
