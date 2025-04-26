@@ -1,8 +1,8 @@
 begindecl 
-integer a, b, c;
+integer a[10];
 enddecl
 
 begin
-    read(a, b);
-    write(a);
+    read(a[0]);
+    write(a[0]);
 end

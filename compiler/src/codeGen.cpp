@@ -48,7 +48,8 @@ void generate_end()
 	.end	main
 	.size	main, .-main
 	.ident	"GCC: (Ubuntu 10.3.0-1ubuntu1) 10.3.0"
-	.section	.note.GNU-stack,"",@progbits)";
+	.section	.note.GNU-stack,"",@progbits
+)";
 }
 
 /**
@@ -114,17 +115,18 @@ void generate_vars(TreeNode *root)
 				}
 				else if (var->token == tokenArr)
 				{
-					cout << "\t.globl\t" + var->name << '\n';
+					cout << "\t.globl\t" + var->left->left->name << '\n';
 					if (!ct)
 					{
 						cout << "\t.section\t\t.bss,\"aw\",@nobits\n";
 					}
 
+					int arraySize = 4 * var->left->right->numValue;
 					cout << "\t.align\t2\n";
-					cout << "\t.type\t" + var->name + ", @object\n";
-					cout << "\t.size\t" + var->name + ", 4\n";
-					cout << var->name << ":\n";
-					cout << "\t.space\t" + to_string(4 * var->left->right->numValue) + "\n";
+					cout << "\t.type\t" + var->left->left->name + ", @object\n";
+					cout << "\t.size\t" + var->left->left->name + ", " + to_string(arraySize) + "\n";
+					cout << var->left->left->name << ":\n";
+					cout << "\t.space\t" + to_string(arraySize) + "\n";
 				}
 
 				var = var->right;
@@ -338,14 +340,22 @@ void generate_printf(TreeNode* var){
 		cout << "\tla $8, " + var->name << endl; // Load address of variable
 		cout << "\tlw $5, 0($8)" << endl;        // Load value into $5 for printf argument
 		cout << "\tjal printf" << endl; // Read integer into $v0
-												// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
+												
+		// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
 	}
 	else if (var->token == tokenArr)
 	{
 		cout << "\n\tla $4, $LC0\n";
-		cout << "\tli $5," + var->left->name + to_string(var->right->numValue * 4) << endl; // Load syscall for read integer
-		cout << "\tjal printf" << endl;												// Read integer into $v0
-																							// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
+		// Generate code for array index
+		generate_expr(var->right); // Compute array index in $2
+		cout << "\tsll $8, $2, 2" << endl; // Multiply index by 4 (word size)
+		cout << "\tla $9, " << var->name << endl; // Load base address of array
+		cout << "\taddu $9, $9, $8" << endl; // Add offset to base address
+		cout << "\tlw $5, 0($9)" << endl; // Load array element value into $5 for printf
+		cout << "\tjal printf" << endl;												
+		// Read integer into $v0
+																							
+		// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
 	}
 }
 
@@ -379,55 +389,54 @@ void generate_scanf(TreeNode *var)
 	if (!var)
 		return;
 
+	printf("%s\n", var->name.c_str());
+
 	if (var->token == tokenVar)
 	{
 		cout << "\n\tla $4, $LC0\n";
 		cout << "\tla $5," + var->name << endl; // Load syscall for read integer
 		cout << "\tjal __isoc99_scanf" << endl; // Read integer into $v0
-												// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
+												
+		// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
 	}
 	else if (var->token == tokenArr)
 	{
 		cout << "\n\tla $4, $LC0\n";
-		cout << "\tli $5," + var->left->name + to_string(var->right->numValue * 4) << endl; // Load syscall for read integer
-		cout << "\tjal __isoc99_scanf" << endl;												// Read integer into $v0
-																							// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
+		// Generate code for array index
+		generate_expr(var->right); // Compute array index in $2
+		cout << "\tsll $8, $2, 2" << endl; // Multiply index by 4 (word size)
+		cout << "\tla $9, " << var->left->name << endl; // Load base address of array
+		cout << "\taddu $5, $9, $8" << endl; // Add offset to base address and store in $5 for scanf
+		cout << "\tjal __isoc99_scanf" << endl;												
+		// Read integer into memory location
 	}
 }
 
 void generate_read(TreeNode *root)
 {
-	/*
-	la	$7,c
-	la	$6,b
-	la	$5,a
-	la	$4,$LC0
-	jal	__isoc99_scanf
-
-	la	$7,array+8
-	la	$6,array+4
-	la	$5,array
-	la	$4,$LC0
-	jal	__isoc99_scanf
-
-	*/
-
 	cout << "# MIPS code for READ" << endl;
+	
 	TreeNode *st_list = root->right;
-
-	while (st_list)
-	{
+	
+	while (st_list) {
 		TreeNode *var = st_list->left;
-		if (!var)
-			break;
-
-		generate_scanf(var);
-
+		if (!var) {
+			// Handle case where this is the last node (it contains the actual variable)
+			var = st_list;
+		}
+		
+		// Process the variable node
+		if (var->token == tokenVar) {
+			// Handle regular variable
+			generate_scanf(var);
+		} else if (var->token == tokenArr) {
+			// Handle array variable (pass the entire node with array name and index)
+			generate_scanf(var);
+		}
+		
+		// Move to the next variable in the list
 		st_list = st_list->right;
 	}
-
-	// printf("%s\n", st_list->name.c_str());
-	generate_scanf(st_list);
 }
 
 void generate_break()
