@@ -374,13 +374,14 @@ void generate_write(TreeNode *root)
 	while (st_list){
 		TreeNode *var = st_list->left;
 		if (!var)
-			break;
+			var = st_list;
+
 		if(var->token != tokenVal && var->token != tokenOp)
 			generate_printf(var);
 
 		st_list = st_list->right;
 	}
-	generate_printf(st_list);
+	// generate_printf(st_list);
 	
 }
 
@@ -425,14 +426,7 @@ void generate_read(TreeNode *root)
 			var = st_list;
 		}
 		
-		// Process the variable node
-		if (var->token == tokenVar) {
-			// Handle regular variable
-			generate_scanf(var);
-		} else if (var->token == tokenArr) {
-			// Handle array variable (pass the entire node with array name and index)
-			generate_scanf(var);
-		}
+		generate_scanf(var); // Generate code for reading the variable
 		
 		// Move to the next variable in the list
 		st_list = st_list->right;
