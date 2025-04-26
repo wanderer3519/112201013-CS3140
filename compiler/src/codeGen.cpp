@@ -90,29 +90,18 @@ void generate_vars(TreeNode *root)
 			{
 				if (var->token == tokenVar)
 				{
-					if (!mem.count(var->name))
+
+					cout << "\t.globl\t" + var->name << '\n';
+					if (!ct)
 					{
-						mem[var->name] = {-1, {}};
-
-						cout << "\t.globl\t" + var->name << '\n';
-						if (!ct)
-						{
-							cout << "\t.section\t\t.bss,\"aw\",@nobits\n";
-						}
-
-						cout << "\t.align\t2\n";
-						cout << "\t.type\t" + var->name + ", @object\n";
-						cout << "\t.size\t" + var->name + ", 4\n";
-						cout << var->name << ":\n";
-						cout << "\t.space\t4\n";
+						cout << "\t.section\t\t.bss,\"aw\",@nobits\n";
 					}
 
-					else
-					{
-						cout << mem.count(var->name) << '\n';
-						yyerror("Redefined variable var: INT");
-						// exit(1);
-					}
+					cout << "\t.align\t2\n";
+					cout << "\t.type\t" + var->name + ", @object\n";
+					cout << "\t.size\t" + var->name + ", 4\n";
+					cout << var->name << ":\n";
+					cout << "\t.space\t4\n";
 				}
 				else if (var->token == tokenArr)
 				{
@@ -156,7 +145,6 @@ $LC1:
 	generate_main();
 }
 
-
 void generate_expr(TreeNode *root)
 {
 	// Code for a + b + c
@@ -180,7 +168,7 @@ void generate_expr(TreeNode *root)
 		return;
 	}
 
-	if (root->left && root->right)
+	if (root->left && root->right && root->token == tokenOp)
 	{
 		generate_expr(root->left);
 		cout << "\taddiu $sp, $sp, -4" << endl;
@@ -196,7 +184,7 @@ void generate_expr(TreeNode *root)
 			cout << "\tsubu $2, $3, $2" << endl;
 		else if (root->name == "*")
 			cout << "\tmul $2, $3, $2" << endl;
-		
+
 		// throws floating point error: should correct later
 		else if (root->name == "/")
 		{
@@ -233,18 +221,19 @@ void generate_expr(TreeNode *root)
 	else if (root->token == tokenVar && mem.count(root->name))
 	{
 		cout << "\tla $10, " + root->name << endl; // Load address of variable into $10
-		cout << "\tlw $2, 0($10)" << endl;		 // Load value from address into $2
+		cout << "\tlw $2, 0($10)" << endl;		   // Load value from address into $2
 	}
-	else if (root->token == tokenArr && mem.count(root->name))
+	else if (root->token == tokenArr && mem.count(root->left->name))
 	{
-		cout << "\tla $10, " + root->name << endl;					   // Load address of array into $10
+		cout << "\tla $10, " + root->left->name << endl;						 // Load address of array into $10
 		cout << "\tli $11, " + to_string(root->right->numValue) << endl; // Load index into $11
-		cout << "\tsll $11, $11, 2" << endl;							   // Multiply index by 4 (word size)
-		cout << "\tadd $10, $10, $11" << endl;						   // Add index to base address
-		cout << "\tlw $2, 0($10)" << endl;							   // Load value from address into $2
+		cout << "\tsll $11, $11, 2" << endl;							 // Multiply index by 4 (word size)
+		cout << "\tadd $10, $10, $11" << endl;							 // Add index to base address
+		cout << "\tlw $2, 0($10)" << endl;								 // Load value from address into $2
 	}
 	else
 	{
+		printf("%s\n", root->name.c_str());
 		yyerror("Invalid expression or undeclared variable");
 	}
 }
@@ -307,10 +296,10 @@ void generate_assignment(TreeNode *root)
 	if (root->left->token == tokenVar && mem.count(root->left->name))
 	{
 		cout << "\tla $10, " << root->left->name << endl; // Load address of variable
-		cout << "\tsw $2, 0($10)" << endl;				// Store result in variable
+		cout << "\tsw $2, 0($10)" << endl;				  // Store result in variable
 	}
 	// Case: array assignment (e.g., a[2] = ...)
-	else if (root->left->token == tokenArr && mem.count(root->left->name))
+	else if (root->left->token == tokenArr && mem.count(root->left->left->name))
 	{
 		// Generate code for array index (assumes index is in right child of left node)
 		TreeNode *indexNode = root->left->right;
@@ -323,11 +312,11 @@ void generate_assignment(TreeNode *root)
 		// Save the value to be stored
 		cout << "\tmove $12, $2" << endl; // Temporarily save RHS value in $12
 
-		generate_expr(indexNode); // Result in $2 (index)
-		cout << "\tsll $2, $2, 2" << endl; // Multiply index by 4 (word size)
-		cout << "\tla $10, " << root->left->name << endl; // Load base address of array
-		cout << "\tadd $10, $10, $2" << endl; // Compute effective address
-		cout << "\tsw $12, 0($10)" << endl; // Store RHS value at calculated address
+		generate_expr(indexNode);						  // Result in $2 (index)
+		cout << "\tsll $2, $2, 2" << endl;				  // Multiply index by 4 (word size)
+		cout << "\tla $10, " << root->left->left->name << endl; // Load base address of array
+		cout << "\tadd $10, $10, $2" << endl;			  // Compute effective address
+		cout << "\tsw $12, 0($10)" << endl;				  // Store RHS value at calculated address
 	}
 	else
 	{
@@ -335,7 +324,8 @@ void generate_assignment(TreeNode *root)
 	}
 }
 
-void generate_printf(TreeNode* var){
+void generate_printf(TreeNode *var)
+{
 	if (!var)
 		return;
 
@@ -343,36 +333,37 @@ void generate_printf(TreeNode* var){
 	{
 		cout << "\n\tla $4, $LC1\n";
 		cout << "\tla $8, " + var->name << endl; // Load address of variable
-		cout << "\tlw $5, 0($8)" << endl;        // Load value into $5 for printf argument
-		cout << "\tjal printf" << endl; // Read integer into $v0
-												
+		cout << "\tlw $5, 0($8)" << endl;		 // Load value into $5 for printf argument
+		cout << "\tjal printf" << endl;			 // Read integer into $v0
+
 		// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
 	}
 	else if (var->token == tokenArr)
 	{
 		cout << "\n\tla $4, $LC1\n";
 		// Generate code for array index
-		generate_expr(var->right); // Compute array index in $2
-		cout << "\tsll $8, $2, 2" << endl; // Multiply index by 4 (word size)
+		generate_expr(var->right);						// Compute array index in $2
+		cout << "\tsll $8, $2, 2" << endl;				// Multiply index by 4 (word size)
 		cout << "\tla $9, " << var->left->name << endl; // Load base address of array
-		cout << "\taddu $9, $9, $8" << endl; // Add offset to base address
-		cout << "\tlw $5, 0($9)" << endl; // Load array element value into $5 for printf
-		cout << "\tjal printf" << endl;												
+		cout << "\taddu $9, $9, $8" << endl;			// Add offset to base address
+		cout << "\tlw $5, 0($9)" << endl;				// Load array element value into $5 for printf
+		cout << "\tjal printf" << endl;
 		// Read integer into $v0
-																							
+
 		// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
 	}
-	else if(var->token == tokenOp) {
+	else if (var->token == tokenOp)
+	{
 		cout << "\n\tla $4, $LC1\n";
 		generate_expr(var);
-		cout << "\tmove $5, $2" << endl;  // Move result from $2 to $5 for printf argument
-		cout << "\tjal printf" << endl; // Read integer into $v0
+		cout << "\tmove $5, $2" << endl; // Move result from $2 to $5 for printf argument
+		cout << "\tjal printf" << endl;	 // Read integer into $v0
 	}
 	else if (var->token == tokenVal)
 	{
 		cout << "\n\tla $4, $LC1\n";
 		cout << "\tli $5, " << var->numValue << endl; // Load immediate value into $5 for printf
-		cout << "\tjal printf" << endl; // Read integer into $v0
+		cout << "\tjal printf" << endl;				  // Read integer into $v0
 	}
 	else
 	{
@@ -392,18 +383,18 @@ void generate_write(TreeNode *root)
 	cout << "# MIPS code for READ" << endl;
 	TreeNode *st_list = root->right;
 
-	while (st_list){
+	while (st_list)
+	{
 		TreeNode *var = st_list->left;
 		if (!var)
 			var = st_list;
 
 		// if(var->token != tokenVal && var->token != tokenOp)
-			generate_printf(var);
+		generate_printf(var);
 
 		st_list = st_list->right;
 	}
 	// generate_printf(st_list);
-	
 }
 
 void generate_scanf(TreeNode *var)
@@ -418,18 +409,18 @@ void generate_scanf(TreeNode *var)
 		cout << "\n\tla $4, $LC0\n";
 		cout << "\tla $5," + var->name << endl; // Load syscall for read integer
 		cout << "\tjal __isoc99_scanf" << endl; // Read integer into $v0
-												
+
 		// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
 	}
 	else if (var->token == tokenArr)
 	{
 		cout << "\n\tla $4, $LC0\n";
 		// Generate code for array index
-		generate_expr(var->right); // Compute array index in $2
-		cout << "\tsll $8, $2, 2" << endl; // Multiply index by 4 (word size)
+		generate_expr(var->right);						// Compute array index in $2
+		cout << "\tsll $8, $2, 2" << endl;				// Multiply index by 4 (word size)
 		cout << "\tla $9, " << var->left->name << endl; // Load base address of array
-		cout << "\taddu $5, $9, $8" << endl; // Add offset to base address and store in $5 for scanf
-		cout << "\tjal __isoc99_scanf" << endl;												
+		cout << "\taddu $5, $9, $8" << endl;			// Add offset to base address and store in $5 for scanf
+		cout << "\tjal __isoc99_scanf" << endl;
 		// Read integer into memory location
 	}
 }
@@ -437,20 +428,20 @@ void generate_scanf(TreeNode *var)
 void generate_read(TreeNode *root)
 {
 	cout << "# MIPS code for READ" << endl;
-	
+
 	TreeNode *st_list = root->right;
-	
-	while (st_list) {
+
+	while (st_list)
+	{
 		TreeNode *var = st_list->left;
-		if (!var) {
+		if (!var)
+		{
 			// Handle case where this is the last node (it contains the actual variable)
 			var = st_list;
 		}
 
-		
-		
 		generate_scanf(var); // Generate code for reading the variable
-		
+
 		// Move to the next variable in the list
 		st_list = st_list->right;
 	}

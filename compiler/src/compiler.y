@@ -84,7 +84,7 @@ Prog:	Gdecl_sec Fdef_sec MainBlock
 Gdecl_sec:	DECL Gdecl_list ENDDECL { 
 		// printf("You are right\n");
 		print_proper($2); // here
-		// declare_vars($2);
+		declare_vars($2);
 		
 
 		init_code(file_name);

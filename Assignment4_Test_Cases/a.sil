@@ -1,6 +1,6 @@
 
 begindecl
-  integer a, b;
+  integer a, b, c;
 enddecl
 
 begin
