@@ -12,6 +12,8 @@ ofstream outputFileMips("./outputs/mips.s");
 extern void yyerror(const char *s);
 extern unordered_map<string, pair<int, vector<int>>> mem;
 
+int label_count = 0;
+
 void generate_main()
 {
 	cout <<
@@ -263,22 +265,24 @@ void generate_for_stmt(TreeNode *root)
 
 void generate_if_else(TreeNode *root)
 {
-	cout << "# MIPS code for IF_ELSE" << endl;
+    int current_label = label_count++;
+    cout << "# MIPS code for IF_ELSE" << endl;
 
-	// Condition
-	generate_expr(root->left);				// Evaluate condition
-	cout << "beqz $t0, ELSE_LABEL" << endl; // Branch to ELSE if condition is false
+    // Condition
+    generate_expr(root->left); // Evaluate condition
+    cout << "\tbeqz $2, ELSE_LABEL_" << current_label << endl; // Unique label
 
-	// IF block
-	print_code_2(root->right->left); // IF block
-	cout << "j END_IF" << endl;		 // Skip ELSE block
+    // IF block
+    print_code_2(root->right->left); // IF block
+    cout << "\tj END_IF_" << current_label << endl; // Unique label
 
-	// ELSE block
-	cout << "ELSE_LABEL:" << endl;
-	print_code_2(root->right->right); // ELSE block
+    // ELSE block
+    cout << "ELSE_LABEL_" << current_label << ":" << endl;
+    print_code_2(root->right->right); // ELSE block
 
-	cout << "END_IF:" << endl;
+    cout << "END_IF_" << current_label << ":" << endl;
 }
+
 
 void generate_assignment(TreeNode *root)
 {
