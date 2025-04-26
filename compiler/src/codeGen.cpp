@@ -4,6 +4,7 @@
 
 using namespace std;
 
+// extern string file_name;
 ofstream outputFileMips("./outputs/mips.s");
 
 #define cout outputFileMips
@@ -195,6 +196,8 @@ void generate_expr(TreeNode *root)
 			cout << "\tsubu $2, $3, $2" << endl;
 		else if (root->name == "*")
 			cout << "\tmul $2, $3, $2" << endl;
+		
+		// throws floating point error: should correct later
 		else if (root->name == "/")
 		{
 			cout << "\tdiv $3, $2" << endl;
