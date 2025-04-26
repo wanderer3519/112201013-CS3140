@@ -11,7 +11,7 @@ clean:
 
 rebuild: clean all
 	mkdir -p ./outputs
-	bin/compiler ../Assignment4_Test_Cases/test1.sil
+	bin/compiler ../Assignment4_Test_Cases/sample1.sil
 
 build_mips:
 	mips-linux-gnu-gcc-10  outputs/mips.s

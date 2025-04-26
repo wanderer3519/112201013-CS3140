@@ -148,7 +148,9 @@ void generate_vars(TreeNode *root)
 	.align	2
 $LC0:
 	.ascii	"%d\000"
-	)";
+	.align	2
+$LC1:
+	.ascii	"%d\n\000")";
 
 	generate_main();
 }
@@ -336,7 +338,7 @@ void generate_printf(TreeNode* var){
 
 	if (var->token == tokenVar)
 	{
-		cout << "\n\tla $4, $LC0\n";
+		cout << "\n\tla $4, $LC1\n";
 		cout << "\tla $8, " + var->name << endl; // Load address of variable
 		cout << "\tlw $5, 0($8)" << endl;        // Load value into $5 for printf argument
 		cout << "\tjal printf" << endl; // Read integer into $v0
@@ -345,7 +347,7 @@ void generate_printf(TreeNode* var){
 	}
 	else if (var->token == tokenArr)
 	{
-		cout << "\n\tla $4, $LC0\n";
+		cout << "\n\tla $4, $LC1\n";
 		// Generate code for array index
 		generate_expr(var->right); // Compute array index in $2
 		cout << "\tsll $8, $2, 2" << endl; // Multiply index by 4 (word size)
@@ -356,6 +358,22 @@ void generate_printf(TreeNode* var){
 		// Read integer into $v0
 																							
 		// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
+	}
+	else if(var->token == tokenOp) {
+		cout << "\n\tla $4, $LC1\n";
+		generate_expr(var);
+		cout << "\tmove $5, $2" << endl;  // Move result from $2 to $5 for printf argument
+		cout << "\tjal printf" << endl; // Read integer into $v0
+	}
+	else if (var->token == tokenVal)
+	{
+		cout << "\n\tla $4, $LC1\n";
+		cout << "\tli $5, " << var->numValue << endl; // Load immediate value into $5 for printf
+		cout << "\tjal printf" << endl; // Read integer into $v0
+	}
+	else
+	{
+		yyerror("Invalid variable or undeclared variable");
 	}
 }
 
@@ -376,7 +394,7 @@ void generate_write(TreeNode *root)
 		if (!var)
 			var = st_list;
 
-		if(var->token != tokenVal && var->token != tokenOp)
+		// if(var->token != tokenVal && var->token != tokenOp)
 			generate_printf(var);
 
 		st_list = st_list->right;
@@ -390,7 +408,7 @@ void generate_scanf(TreeNode *var)
 	if (!var)
 		return;
 
-	printf("%s\n", var->name.c_str());
+	// printf("%s\n", var->name.c_str());
 
 	if (var->token == tokenVar)
 	{
