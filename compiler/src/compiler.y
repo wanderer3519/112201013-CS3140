@@ -372,14 +372,14 @@ para:
 	;
 
 expr_list:	
-	 expr { $$ = $1; }
+	 expr { $$ = new TreeNode("EXPR_LIST", tokenKey, $1, nullptr); }
 	|	expr ',' expr_list { 
 		$$ = new TreeNode("EXPR_LIST", tokenKey, $1, $3);
 	}
 	;
 
 var_expr_list:	
-	 var_expr { $$ = $1; }
+	 var_expr { $$ = new TreeNode("EXPR_LIST", tokenKey, $1, nullptr); }
 	|	var_expr ',' var_expr_list  { 
 		$$ = new TreeNode("EXPR_LIST", tokenKey, $1, $3);
 	}

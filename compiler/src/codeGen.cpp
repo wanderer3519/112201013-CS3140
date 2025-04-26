@@ -349,7 +349,7 @@ void generate_printf(TreeNode* var){
 		// Generate code for array index
 		generate_expr(var->right); // Compute array index in $2
 		cout << "\tsll $8, $2, 2" << endl; // Multiply index by 4 (word size)
-		cout << "\tla $9, " << var->name << endl; // Load base address of array
+		cout << "\tla $9, " << var->left->name << endl; // Load base address of array
 		cout << "\taddu $9, $9, $8" << endl; // Add offset to base address
 		cout << "\tlw $5, 0($9)" << endl; // Load array element value into $5 for printf
 		cout << "\tjal printf" << endl;												
@@ -425,6 +425,8 @@ void generate_read(TreeNode *root)
 			// Handle case where this is the last node (it contains the actual variable)
 			var = st_list;
 		}
+
+		
 		
 		generate_scanf(var); // Generate code for reading the variable
 		
