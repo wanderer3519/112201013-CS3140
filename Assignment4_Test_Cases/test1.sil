@@ -4,4 +4,5 @@ enddecl
 
 begin
     read(a, b);
+    write(a);
 end

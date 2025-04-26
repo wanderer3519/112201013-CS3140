@@ -33,8 +33,7 @@ main:
 	sw	$31,28($sp)
 	sw	$fp,24($sp)
 	move	$fp,$sp
-	.cprestore	16
-	)";
+	.cprestore	16)";
 }
 
 void generate_end()
@@ -49,8 +48,7 @@ void generate_end()
 	.end	main
 	.size	main, .-main
 	.ident	"GCC: (Ubuntu 10.3.0-1ubuntu1) 10.3.0"
-	.section	.note.GNU-stack,"",@progbits
-	)";
+	.section	.note.GNU-stack,"",@progbits)";
 }
 
 /**
@@ -330,6 +328,26 @@ void generate_assignment(TreeNode *root)
 	}
 }
 
+void generate_printf(TreeNode* var){
+	if (!var)
+		return;
+
+	if (var->token == tokenVar)
+	{
+		cout << "\n\tla $4, $LC0\n";
+		cout << "\tla $8, " + var->name << endl; // Load address of variable
+		cout << "\tlw $5, 0($8)" << endl;        // Load value into $5 for printf argument
+		cout << "\tjal printf" << endl; // Read integer into $v0
+												// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
+	}
+	else if (var->token == tokenArr)
+	{
+		cout << "\n\tla $4, $LC0\n";
+		cout << "\tli $5," + var->left->name + to_string(var->right->numValue * 4) << endl; // Load syscall for read integer
+		cout << "\tjal printf" << endl;												// Read integer into $v0
+																							// cout << "sw $v0, " << var->numValue << "($sp)" << endl; // Store value in memory
+	}
+}
 
 void generate_write(TreeNode *root)
 {
@@ -340,12 +358,20 @@ void generate_write(TreeNode *root)
 		return;
 	}
 
-	// print_code_2(root->left); // Evaluate expression
-	generate_expr(root->right); // Evaluate expression
+	cout << "# MIPS code for READ" << endl;
+	TreeNode *st_list = root->right;
 
-	cout << "li $v0, 1" << endl;	 // Load syscall for print integer
-	cout << "move $a0, $t0" << endl; // Move result to $a0
-	cout << "syscall" << endl;
+	while (st_list){
+		TreeNode *var = st_list->left;
+		if (!var)
+			break;
+		if(var->token != tokenVal && var->token != tokenOp)
+			generate_printf(var);
+
+		st_list = st_list->right;
+	}
+	generate_printf(st_list);
+	
 }
 
 void generate_scanf(TreeNode *var)
