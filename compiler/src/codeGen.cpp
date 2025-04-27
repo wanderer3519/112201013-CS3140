@@ -227,11 +227,23 @@ void generate_expr(TreeNode *root)
 	}
 	else if (root->token == tokenArr && mem.count(root->left->name))
 	{
-		cout << "\tla $10, " + root->left->name << endl;						 // Load address of array into $10
-		cout << "\tli $11, " + to_string(root->right->numValue) << endl; // Load index into $11
-		cout << "\tsll $11, $11, 2" << endl;							 // Multiply index by 4 (word size)
-		cout << "\tadd $10, $10, $11" << endl;							 // Add index to base address
-		cout << "\tlw $2, 0($10)" << endl;								 // Load value from address into $2
+		// cout << "\tla $10, " + root->left->name << endl;						 // Load address of array into $10
+		// cout << "\tli $11, " + to_string(root->right->numValue) << endl; // Load index into $11
+		// cout << "\tsll $11, $11, 2" << endl;							 // Multiply index by 4 (word size)
+		// cout << "\tadd $10, $10, $11" << endl;							 // Add index to base address
+		// cout << "\tlw $2, 0($10)" << endl;
+										 
+		// Load value from address into $2
+		cout << "\t# Compute index for array access: array[i]" << endl;
+		generate_expr(root->right); // Evaluate the index expression into $2
+		cout << "\tsll $2, $2, 2" << endl; // Multiply index by 4 (word size)
+
+		// Load the base address of the array
+		cout << "\tla $10, " << root->left->name << endl; // Load base address of the array into $10
+
+		// Compute the effective address and load the value
+		cout << "\tadd $10, $10, $2" << endl; // Add the index offset to the base address
+		cout << "\tlw $2, 0($10)" << endl;   // Load the value from the computed address into $2
 	}
 	else
 	{
@@ -242,25 +254,28 @@ void generate_expr(TreeNode *root)
 
 void generate_for_stmt(TreeNode *root)
 {
-	cout << "# MIPS code for FOR_STMT" << endl;
+    int current_label = label_count++; // Generate a unique label for this loop
+    cout << "# MIPS code for FOR_STMT" << endl;
 
-	// Initialization
-	print_code_2(root->left->left); // Initialization statement
+    // Initialization
+    print_code_2(root->left->left); // Initialization statement
 
-	cout << "FOR_START:" << endl;
+    // Start label
+    cout << "FOR_START_" << current_label << ":" << endl;
 
-	// Condition
-	generate_expr(root->left->right);	 // Condition expression
-	cout << "beqz $t0, FOR_END" << endl; // Exit loop if condition is false
+    // Condition
+    generate_expr(root->left->right);    // Condition expression
+    cout << "\tbeqz $2, FOR_END_" << current_label << endl; // Exit loop if condition is false
 
-	// Loop body
-	print_code_2(root->right->right); // Loop body
+    // Loop body
+    print_code_2(root->right->right); // Loop body
 
-	// Update statement
-	print_code_2(root->right->left); // Update statement
-	cout << "j FOR_START" << endl;	 // Jump back to start
+    // Update statement
+    print_code_2(root->right->left); // Update statement
+    cout << "\tj FOR_START_" << current_label << endl; // Jump back to start
 
-	cout << "FOR_END:" << endl;
+    // End label
+    cout << "FOR_END_" << current_label << ":" << endl;
 }
 
 void generate_if_else(TreeNode *root)

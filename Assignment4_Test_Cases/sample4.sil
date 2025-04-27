@@ -11,14 +11,14 @@ begin
 
   found = 0;
   for (index = 0; index < 4; index++) {
-    if (array[index] == key) {
+    if (array[index] == key) then
       found = 1;
-    }
+    endif
   }
 
-  if (found == 1) {
+  if (found == 1) then
     write(1);
-  } else {
+   else 
     write(0);
-  }
+  endif
 end
