@@ -1,11 +1,34 @@
 #include "tree.hpp"
+#include "common.h"
 #include <bits/stdc++.h>
 #include <iomanip>
 
 using namespace std;
 
 // extern string file_name;
-ofstream outputFileMips("./outputs/mips.s");
+
+string getOutputFileName(const string& inputPath) {
+    size_t lastSlash = inputPath.find_last_of("/\\");
+    string fileName = (lastSlash == string::npos) ? inputPath : inputPath.substr(lastSlash + 1);
+    size_t lastDot = fileName.find_last_of('.');
+    if (lastDot != string::npos) {
+        fileName = fileName.substr(0, lastDot);
+    }
+    return fileName + ".s";
+}
+
+string outputFileName = getOutputFileName(file_name);
+ofstream outputFileMips;
+
+void initCodeGen() {
+    string filename = getOutputFileName(file_name);
+    outputFileMips.open(filename);
+
+    if (!outputFileMips) {
+        cerr << "Error opening file " << filename << " for writing.\n";
+        exit(1);  // or handle properly
+    }
+}
 
 #define cout outputFileMips
 
@@ -519,6 +542,6 @@ void print_code(TreeNode *root)
 {
 	print_code_2(root);
 	generate_end();
+
+	outputFileMips.close();
 }
-
-

@@ -42,3 +42,4 @@
 *.vscode/
 compiler/bin/
 *outputs/
+*.s

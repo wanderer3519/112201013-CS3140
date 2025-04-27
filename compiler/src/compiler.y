@@ -17,6 +17,7 @@
 
 %{	
 	#include "tree.hpp"
+	#include "common.h"
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <bits/stdc++.h>
@@ -443,10 +444,7 @@ int main(int argc, char* argv[]){
 	}
 
 	file_name = argv[1];
-	// Extract the base filename without extension for output files
-	string base_name = file_name.substr(file_name.find_last_of("/\\") + 1);
-	fname = base_name.substr(0, base_name.find_last_of('.'));
-	/* cout << fname << endl; */
+	initCodeGen();
 	
 	FILE *file = fopen(argv[1], "r");
     if (!file) {
