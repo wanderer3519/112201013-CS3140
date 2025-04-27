@@ -3,7 +3,7 @@
 begindecl
   integer arr[16];
   integer len;
-  integer i;
+  integer i, temp;
 enddecl
 
 begin
@@ -14,7 +14,9 @@ begin
   }
   
   for(i = 0; i < len / 2; i++) {
+    temp = arr[i];
     arr[i] = arr[len - i - 1];
+    arr[len - i - 1] = temp;
   }
 
   for(i = 0; i < len; i++) {

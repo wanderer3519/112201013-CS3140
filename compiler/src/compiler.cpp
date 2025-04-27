@@ -2,9 +2,6 @@
 #include <bits/stdc++.h>
 #include <iomanip>
 
-ofstream outputFileTree("./outputs/tree.txt");
-
-#define cout outputFileTree
 
 using namespace std;
 
@@ -545,37 +542,47 @@ void declare_vars(TreeNode *root)
 		curr = curr->right;
 	}
 }
-
 void print_symbol_table(const unordered_map<string, pair<int, vector<int>>> &mem)
 {
 	cout << "Symbol Table:\n";
-	cout << "---------------------------------\n";
-	cout << "| Variable  | Value  | References |\n";
-	cout << "---------------------------------\n";
+	cout << "---------------------------------------------------------------------\n";
+	cout << "| Variable  | Type    | Structure | Size | Value                    |\n";
+	cout << "---------------------------------------------------------------------\n";
 
 	for (const auto &entry : mem)
 	{
 		const string &varName = entry.first;
 		int value = entry.second.first;
-		const vector<int> &references = entry.second.second;
+		const vector<int> &arr = entry.second.second;
+		
+		string structure = arr.empty() ? "scalar" : "array";
+		string typeDisplay = boolVars.count(varName) ? "boolean" : "integer";
+		int size = arr.empty() ? 1 : arr.size();
 
 		cout << "| " << setw(9) << left << varName << " | "
-			 << setw(6) << value << " | ";
+			 << setw(7) << left << typeDisplay << " | "
+			 << setw(9) << left << structure << " | "
+			 << setw(4) << left << size << " | ";
 
-		if (references.empty())
+		if (arr.empty())
 		{
-			cout << "None";
+			cout << setw(24) << left << value;
 		}
 		else
 		{
-			for (size_t i = 0; i < references.size(); i++)
+			string arrValues = "[";
+			for (size_t i = 0; i < min(size_t(3), arr.size()); i++)
 			{
-				cout << references[i];
-				if (i != references.size() - 1)
-					cout << ", ";
+				arrValues += to_string(arr[i]);
+				if (i != min(size_t(2), arr.size() - 1))
+					arrValues += ",";
 			}
+			if (arr.size() > 3)
+				arrValues += "...";
+			arrValues += "]";
+			cout << setw(24) << left << arrValues;
 		}
 		cout << " |\n";
 	}
-	cout << "---------------------------------\n";
+	cout << "---------------------------------------------------------------------\n";
 }

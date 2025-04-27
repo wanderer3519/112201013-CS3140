@@ -216,11 +216,11 @@ MainBlock:
 	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }			  
 	| BEG stmt_list END { 
 			// root = $2;
-			cout << '\n';
+			
 			print_proper($2);
+			
 
-
-			cout << "\nDone symbol table: Now printing the MIPS code...\n";
+			// cout << "\nDone AST: Now printing the MIPS code...\n";
 			
 			print_code($2);
 
@@ -432,8 +432,9 @@ var_expr:
 %%
 
 void yyerror(const char* s){
-	print_symbol_table(mem);
+
    	fprintf(stderr, "Error: %s at line number: %d \n", s, lineno);
+	exit(1);
 }
 
 
