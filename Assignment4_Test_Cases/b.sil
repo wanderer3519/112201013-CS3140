@@ -1,4 +1,3 @@
-
 begindecl
   integer a[4];
 enddecl

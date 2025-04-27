@@ -14,9 +14,9 @@ begin
   }
 
   for(i = 0; i < len; i++) {
-    if(arr[i] != i) {
+    if(arr[i] != i) then
       break;
-    }
+    endif
   }
 
   write(i);

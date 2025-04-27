@@ -35,6 +35,7 @@
 	extern FILE* yyin;
     // int i;
 	string file_name;
+	string fname;
 
 	int lineno;
 	
@@ -442,6 +443,11 @@ int main(int argc, char* argv[]){
 	}
 
 	file_name = argv[1];
+	// Extract the base filename without extension for output files
+	string base_name = file_name.substr(file_name.find_last_of("/\\") + 1);
+	fname = base_name.substr(0, base_name.find_last_of('.'));
+	/* cout << fname << endl; */
+	
 	FILE *file = fopen(argv[1], "r");
     if (!file) {
         perror("fopen");

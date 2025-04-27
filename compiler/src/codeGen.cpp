@@ -12,7 +12,8 @@ ofstream outputFileMips("./outputs/mips.s");
 extern void yyerror(const char *s);
 extern unordered_map<string, pair<int, vector<int>>> mem;
 
-int label_count = 0;
+int if_label_count = 0;
+int for_label_count = 0;
 
 void generate_main()
 {
@@ -254,7 +255,7 @@ void generate_expr(TreeNode *root)
 
 void generate_for_stmt(TreeNode *root)
 {
-    int current_label = label_count++; // Generate a unique label for this loop
+    int current_label = for_label_count++; // Generate a unique label for this loop
     cout << "# MIPS code for FOR_STMT" << endl;
 
     // Initialization
@@ -280,7 +281,7 @@ void generate_for_stmt(TreeNode *root)
 
 void generate_if_else(TreeNode *root)
 {
-    int current_label = label_count++;
+    int current_label = if_label_count++;
     cout << "# MIPS code for IF_ELSE" << endl;
 
     // Condition
@@ -468,8 +469,9 @@ void generate_read(TreeNode *root)
 
 void generate_break()
 {
+	int current_label = for_label_count - 1;
 	cout << "# MIPS code for BREAK" << endl;
-	cout << "j FOR_END" << endl; // Jump to end of loop
+	cout << "\tj FOR_END_" << current_label << endl; // Jump to end of loop
 }
 
 void print_code_2(TreeNode *root)
@@ -518,3 +520,5 @@ void print_code(TreeNode *root)
 	print_code_2(root);
 	generate_end();
 }
+
+

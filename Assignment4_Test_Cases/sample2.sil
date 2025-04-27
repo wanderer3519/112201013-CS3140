@@ -8,7 +8,7 @@ enddecl
 begin
   filter[0] = -1;
   filter[1] = 0;
-  filter[1] = 1;
+  filter[2] = 1;
 
   read(array[0], array[1]);
   read(array[2]);
