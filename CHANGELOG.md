@@ -33,3 +33,17 @@ Test 2
 
 # Week 11 (Mar 23 - Mar 29)
 Finished assignment 3
+
+# Week 12 (Mar 30 - April 5)
+Started working on assignment 4:
+Looked at how to pass symbol table and make it into machine code
+
+# Week 13 (April 6 - April 12)
+Looked at the problem of how to make the code more readable, 
+how to make this compiler into a gcc-like compiler
+
+# Week 14 (April 13 - April 19)
+Suffered from fever, could not work thoroughly
+
+# Week 15 (April 20 - April 27)
+Worked on different grammar statements. Finished every one of them
