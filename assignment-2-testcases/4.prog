@@ -1,7 +1,0 @@
-begindecl
-integer var1, var2;
-integer var3, var4;
-integer v5, v6;
-enddecl
-
-var5 = 10;

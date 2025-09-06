@@ -1,0 +1,16 @@
+begindecl
+integer i, j;
+integer k;
+enddecl
+
+begin
+    if(1 > 2) then
+        write("Hello");
+    else
+        write("World");
+    endif
+
+    for(i = 0; i < 4; i = i + 1){
+        write("Hello");
+    }
+end

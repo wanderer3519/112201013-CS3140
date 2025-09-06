@@ -1,0 +1,14 @@
+begindecl
+integer var[5];
+integer var1;
+enddecl
+
+begin
+    var[2] = 126;
+
+    if(var[2] > 11) then
+        write(var[2]);
+    else
+        write("Hello");
+    endif
+end

@@ -1,0 +1,11 @@
+begindecl
+  integer a[4];
+enddecl
+
+begin
+  read(a[0], a[1], a[2]);
+
+  a[3] = a[0] + a[1] + a[2];
+
+  write(a[3]);
+end

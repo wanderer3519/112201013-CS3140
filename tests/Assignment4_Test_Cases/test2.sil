@@ -1,0 +1,8 @@
+begindecl
+    integer a, b, c, d;
+enddecl
+
+begin
+    read(a, b, c);
+
+end

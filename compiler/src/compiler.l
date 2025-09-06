@@ -93,44 +93,20 @@ break           { return BREAK; }
 
 
 
-\/\/(.*) ; /* Regular expression for single line comment */   
+\/\/(.*) ; 
 
-{start}.*{end} ; /* Regular expression for multi line comment */  
+{start}.*{end} ;
 
 .	{ 
-        // char* str = "Invalid character";
         yyerror("Invalid char"); 
-    
     }		
 	
-
-  
 %%
 
 
 int yywrap(){
     printf("\nPrinting symbol table\n");
-    /* for(auto p: mem){
-        // P: pair of string, pair<int, vector<int>> 
-
-        string key = p.first;
-        // int key1 = p.first;
-        int val = p.second.first;
-
-        cout << "mem[" << key << "] = ";
-
-        if(!p.second.second.empty()){
-            for(auto num: p.second.second){
-                cout <<  num << ", ";        
-            }
-            cout << "NULL\n";
-        }
-        else
-            cout << val << '\n';
-    } */
-
     print_symbol_table(mem);
-
 
     return 1;
 }

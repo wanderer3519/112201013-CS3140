@@ -36,10 +36,11 @@ void print_level(TreeNode *root, int t_level, int p_level, int height)
 			print_level(NULL, t_level + 1, p_level, height);
 		return;
 	}
-	// t_level == p_level
-	int padding = 1; // for alignment
+	
+	int padding = 1;
 	for (int i = p_level; i < height - 1; i++)
 		padding = padding * 2 + 1;
+	
 	// To prefix some space and a line
 	for (int i = 0; i < (padding + 1) / 2; i++)
 		printf("  ");
@@ -49,12 +50,7 @@ void print_level(TreeNode *root, int t_level, int p_level, int height)
 	{
 		switch (root->token)
 		{
-		// case tokenVar:
-		// // printf("%s", root->name);
-		// cout << root->name;
-		// break;
 		case tokenOp:
-			// printf("%s", root->name);
 			if (root->name[0] == '+')
 			{
 				printf("PLUS");
@@ -91,7 +87,7 @@ void print_level(TreeNode *root, int t_level, int p_level, int height)
 	}
 	else
 		printf("()");
-	// To suffix a line and some space
+	
 	for (int i = (padding + 1) / 2; i < padding; i++)
 		printf("__");
 	for (int i = 0; i < (padding + 1) / 2; i++)
@@ -175,7 +171,6 @@ void print_proper(TreeNode *root, string prefix, bool isLeft)
 	}
 	cout << endl;
 
-	// Construct the prefix for child nodes
 	string newPrefix = prefix + (isLeft ? "│   " : "    ");
 
 	// Print left and right children
@@ -194,9 +189,6 @@ int evaluate_expr(TreeNode *root)
 		return root->numValue;
 	else if (root->token == tokenVar && !mem.count(root->name))
 	{
-		// printf("VAR: %s|\n", root->name);
-		// char* str;
-		// sprintf(str, "Undefined Variable %s", root->name);
 		yyerror("Undefined Variable in Eval expr");
 		exit(0);
 	}
@@ -277,7 +269,7 @@ int evaluate_expr(TreeNode *root)
 	return ans;
 }
 
-bool breakFlag = false; // Global flag for break handling
+bool breakFlag = false;
 
 void execute_stmt(TreeNode *root)
 {
@@ -286,22 +278,18 @@ void execute_stmt(TreeNode *root)
 
 	if (breakFlag)
 	{
-		// breakFlag = false;
 		return;
 	}
 
-	// cout << "DEBUG: " << root->name << '\n';
+	
 
 	/* Write every statement as a function then use them */
 
 	if (root->name == "WRITE")
 	{
-		// $3 = root->right
-		// string printing
 		if (root->right->name == "STRING")
 			cout << root->right->left->name << '\n';
 
-		// expr printing
 		else
 		{
 
@@ -332,14 +320,12 @@ void execute_stmt(TreeNode *root)
 	{
 		if (root->left->token == tokenVar && !mem.count(root->left->name))
 		{
-			// print_symbol_table(mem);
 			yyerror("Undefined variable var in assign");
 			exit(0);
 		}
 
 		if (root->left->token == tokenArr && !mem.count(root->left->left->name))
 		{
-			// print_symbol_table(mem);
 			yyerror("Undefined variable arr in assign");
 			exit(0);
 		}
@@ -351,8 +337,6 @@ void execute_stmt(TreeNode *root)
 		else if(root->left->token == tokenArr){
 			name = root->left->left->name;
 		}
-
-		// string name = (root->left->token == tokenVal) ? root->left->name : root->left->left->name;
 		
 		if(boolVars.count(name)){
 			TreeNode* rexp = root->right;
@@ -374,7 +358,6 @@ void execute_stmt(TreeNode *root)
 			int ind = evaluate_expr(root->left->right);
 			string name = root->left->left->name;
 
-			// cout << mem[name].second[0] << '\n';
 			mem[name].second[ind] = x;
 		}
 	}
@@ -382,12 +365,12 @@ void execute_stmt(TreeNode *root)
 	else if (root->name == "IF_ELSE")
 	{
 		int exp = evaluate_expr(root->left);
-		// printf("EXP: %d\n", exp);
+
 		if (exp)
 		{
-			// curr is the stmt_list
+
 			TreeNode *curr = root->right->left;
-			// cout << curr->name << '\n';
+
 			while (curr)
 			{
 				execute_stmt(curr->left);
@@ -397,7 +380,6 @@ void execute_stmt(TreeNode *root)
 
 		else
 		{
-			// curr is the stmt_list
 			TreeNode *curr = root->right->right;
 
 			while (curr)
@@ -409,13 +391,12 @@ void execute_stmt(TreeNode *root)
 	}
 	else if (root->name == "FOR_STMT")
 	{
-		execute_stmt(root->left->left); // execute assign
+		execute_stmt(root->left->left);
 
 		TreeNode *cond = root->left->right;
 		int flag = evaluate_expr(cond);
 		while (flag)
 		{
-			// cout << "Hello1\n";
 
 			TreeNode *stlist = root->right->right;
 			TreeNode *stHead = stlist;
@@ -429,8 +410,8 @@ void execute_stmt(TreeNode *root)
 			}
 
 			if (breakFlag)
-			{					   // Stop execution if break is encountered
-				breakFlag = false; // Reset for future loops
+			{
+				breakFlag = false;
 				break;
 			}
 
@@ -444,7 +425,6 @@ void execute_stmt(TreeNode *root)
 	else if (root->name == "STMT_LIST")
 	{
 		execute_stmt(root->left);
-		// print_proper(root->left, "", true);
 		execute_stmt(root->right);
 	}
 	else if (root->name == "BREAK")
@@ -473,7 +453,6 @@ void declare_vars(TreeNode *root)
 					{
 						cout << mem.count(var->name) << '\n';
 						yyerror("Redefined variable var: INT");
-						// exit(1);
 					}
 				}
 				else if (var->token == tokenArr)
@@ -489,7 +468,6 @@ void declare_vars(TreeNode *root)
 					else
 					{
 						yyerror("Redefined variable array");
-						// exit(1);
 					}
 				}
 
@@ -514,7 +492,6 @@ void declare_vars(TreeNode *root)
 					{
 						cout << mem.count(var->name) << '\n';
 						yyerror("Redefined variable var: BOOL");
-						// exit(1);
 					}
 				}
 				else if (var->token == tokenArr)
@@ -531,7 +508,6 @@ void declare_vars(TreeNode *root)
 					else
 					{
 						yyerror("Redefined variable array");
-						// exit(1);
 					}
 				}
 

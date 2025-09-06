@@ -26,7 +26,6 @@
 
 	unordered_map<string, pair<int, vector<int>> >mem;
 	unordered_set<string> boolVars;
-	// TreeNode* root;
 
 	FILE* fout_tree;
 	FILE* fout_mips;
@@ -34,12 +33,11 @@
 	int yylex();
 	void yyerror(const char* s);
 	extern FILE* yyin;
-    // int i;
+
 	string file_name;
 	string fname;
 
-	int lineno;
-	
+	int lineno;	
 %}
 
 %union{
@@ -50,7 +48,6 @@
 }
 
 
-/* %type <node> Gdecl_sec Gdecl_list */
 %type <node> arg_list1 arg_list arg func ret_type 
 %type <node> Gid expr var_expr func_call param_list para param_list1 str_expr assign_stmt Gdecl_list
 %type <node> Gdecl Glist read_stmt write_stmt statement stmt_list func_stmt cond_stmt expr_list var_expr_list
@@ -84,11 +81,9 @@ Prog:	Gdecl_sec Fdef_sec MainBlock
 	;
 
 Gdecl_sec:	DECL Gdecl_list ENDDECL { 
-		// printf("You are right\n");
-		print_proper($2); // here
+		print_proper($2);
 		declare_vars($2);
 		
-
 		init_code(file_name);
 		generate_vars($2);
  	}
@@ -100,17 +95,20 @@ Gdecl_list:  { $$ = nullptr; }
 		}
 	;
 	
-/* gdecl: integer var1, var2, var3;
+/* 
+	NOTE: This part of syntax is ignored for now
+
+	gdecl: integer var1, var2, var3;
 	ret_type: integer
 	glist: var1, var2, var3;
 	gid: var1 (VAR)
 	gid: var2
 	gid: var3
 */
+
 Gdecl:	ret_type Glist  ';' {
 			$$ = $1;
 			$$->right = $2;
-			// lineno++;
 		}
 		;
 	
@@ -135,35 +133,14 @@ Glist:	Gid {
 
 Gid	:	VAR	{
 			$$ = new TreeNode($1, tokenVar); 
-			// if(!mem.count($1))
-			// 	mem[$1] = {-1, {}};
-			// else
-			// 	yyerror("Redefined variable var");
 		}
 	|	VAR '[' NUM ']'	{
 			$$ = new TreeNode("ARRAY", tokenArr, 
 				 new TreeNode("X", tokenKey, new TreeNode($1, tokenVar),  new TreeNode($3, tokenVal)), nullptr);
 
-			// if(!mem.count($1)){
-			// 	mem[$1].first = 0;
-			// 	mem[$1].second = vector<int>($3, -1);
-			// }
-			// else{
-			// 	yyerror("Redefined variable array");
-			// }
 		}
 	;
 	
-/* 
-	func: read(integer a, integer b) 
-	arg_list: integer a, integer b
-	arg_list1: integer a, integer b
-	arg: integer a
-	arg: integer b
-
-	var_list: a
-	var_list: b
-*/
 
 func:	VAR '(' arg_list ')' { }
 	;
@@ -178,16 +155,20 @@ arg_list1:
     ;
 
 arg:
-    expr {  }  // Argument is just an expression
+    expr {  }
     ;
 
-/* arg_type:	T_INT		 { $$ = new TreeNode(tokenKey, $1); }
-	; */
+/* 
+	NOTE: Ignored for now 
 
-/* var_list:	
-		VAR 		 { $$ = new TreeNode(new VarClass(sym[i++])); }
-	|	VAR ',' var_list { $$ = new TreeNode(new VarClass(sym[i++]), nullptr, $3); }
-	; */
+	arg_type:	T_INT		 { $$ = new TreeNode(tokenKey, $1); }
+		;  
+
+	var_list:	
+			VAR 		 { $$ = new TreeNode(new VarClass(sym[i++])); }
+		|	VAR ',' var_list { $$ = new TreeNode(new VarClass(sym[i++]), nullptr, $3); }
+		; 
+*/
 	
 Fdef_sec:	
 	|	Fdef_sec Fdef
@@ -198,7 +179,7 @@ Fdef:
 	;
 	
 func_ret_type:	
-		T_INT		{ } /* Only int is return type */
+		T_INT		{ }
 	;
 		
 func_name:	
@@ -215,16 +196,10 @@ ret_stmt:
 MainBlock: 	
 	func_ret_type main '('')''{' Ldecl_sec BEG stmt_list ret_stmt END  '}'		{ 				  	  }			  
 	| BEG stmt_list END { 
-			// root = $2;
-			
 			print_proper($2);
 			
-
-			// cout << "\nDone AST: Now printing the MIPS code...\n";
 			
 			print_code($2);
-
-			// execute_stmt($2);
 		}
 	;
 	
@@ -255,8 +230,6 @@ Lid	:
 	VAR			{ 						}
 	;
 
-
-/* needed for assignment 2 */
 stmt_list:	
 		/* NULL */		{ $$ = nullptr; }
 	|	statement stmt_list	{ $$ = new TreeNode("STMT_LIST", tokenKey, $1, $2); }
@@ -275,26 +248,19 @@ statement:
 read_stmt:	
 	READ '(' var_expr_list ')' { 
 			$$ = new TreeNode("READ", tokenKey, nullptr, $3); 
-			// print_tree($$); 
 		}
 	;
 
 write_stmt:	
 	WRITE '(' expr_list ')' 	{ 
 		$$ = new TreeNode("WRITE", tokenKey, nullptr, $3); 
-		// print_tree($$);
-		// execute_stmt($$);
 	 }
 	|	WRITE '(''"' str_expr '"'')'    { 
-			// cout << "Here str_exrp\n";
 			$$ = new TreeNode("WRITE", tokenKey, nullptr, $4); 
-			// print_tree($$); 
-			// execute_stmt($$);
 		}
 	| WRITE '(' STRING ')' { $$ = new TreeNode("WRITE", tokenKey, nullptr, new TreeNode($3, tokenStr)); }
 	;
 
-/* use this */
 assign_stmt:  { $$ = nullptr; }
 	| var_expr '=' expr 	{ 
 		$$ = new TreeNode("=", tokenOp, $1, $3);
@@ -324,29 +290,19 @@ assign_stmt:  { $$ = nullptr; }
 cond_stmt:	
 	IF '(' expr ')' THEN stmt_list ENDIF 	{
 			TreeNode* right = new TreeNode("Buf", tokenKey, $6, nullptr);
-			
 			$$ = new TreeNode("IF_ELSE", tokenKey, $3, right);
-			// print_tree($$);
-			
-			
 		}
 
 	|	IF '(' expr ')' THEN stmt_list  ELSE  stmt_list  ENDIF	{ 
 			TreeNode* right = new TreeNode("Buf", tokenKey, $6, $8);
 
 			$$ = new TreeNode("IF_ELSE", tokenKey, $3, right); 
-			
-			// print_tree($$);
-			// execute_stmt($$);
 		}
 
     |   FOR '(' assign_stmt   ';'  expr  ';'  assign_stmt ')' '{' stmt_list '}'   { 
 			$$ = new TreeNode("FOR_STMT", tokenKey);
 			$$->left = new TreeNode("Buf1", tokenKey, $3, $5);
 			$$->right = new TreeNode("Buf2", tokenKey, $7, $10);
-			
-			// print_tree($$);
-			// execute_stmt($$);
 	 	}
 	;
 
@@ -422,7 +378,7 @@ str_expr:
 				name.push_back(c);
 			}
 			$$->left->name = name;
-		}
+		} // Multiple VAR node
   ;
 
 var_expr:	
@@ -432,7 +388,6 @@ var_expr:
 %%
 
 void yyerror(const char* s){
-
    	fprintf(stderr, "Error: %s at line number: %d \n", s, lineno);
 	exit(1);
 }

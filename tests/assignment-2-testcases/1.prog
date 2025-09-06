@@ -1,0 +1,11 @@
+begindecl 
+  integer a, b, c;
+enddecl
+
+a = 10;
+write(a);
+b = 20;
+write(b);
+c = a + b * a - b;
+write(c);
+c = 1;

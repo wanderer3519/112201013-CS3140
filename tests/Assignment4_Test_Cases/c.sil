@@ -1,0 +1,25 @@
+// Program to reverse an array
+
+begindecl
+  integer arr[16];
+  integer len;
+  integer i, temp;
+enddecl
+
+begin
+  read(len); // Expecting 0 <= len <= 16
+
+  for(i = 0; i < len; i++) {
+    read(arr[i]);
+  }
+  
+  for(i = 0; i < len / 2; i++) {
+    temp = arr[i];
+    arr[i] = arr[len - i - 1];
+    arr[len - i - 1] = temp;
+  }
+
+  for(i = 0; i < len; i++) {
+    write(arr[i]);
+  }
+end

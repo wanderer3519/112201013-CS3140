@@ -1,0 +1,34 @@
+begindecl
+  integer array[5];
+  integer filter[3];
+  integer convolution[3];
+  integer sum;
+enddecl
+
+begin
+  filter[0] = -1;
+  filter[1] = 0;
+  filter[2] = 1;
+
+  read(array[0], array[1]);
+  read(array[2]);
+  read(array[3], array[4]);
+
+  convolution[0] 
+    = (array[0] * filter[0])
+    + (array[1] * filter[1])
+    + (array[2] * filter[2]); 
+
+  convolution[1] 
+    = (array[1] * filter[0])
+    + (array[2] * filter[1])
+    + (array[3] * filter[2]); 
+
+  convolution[2] 
+    = (array[2] * filter[0])
+    + (array[3] * filter[1])
+    + (array[4] * filter[2]);
+
+  sum = convolution[0] + convolution[1] + convolution[2];
+  write(convolution[0] / sum, convolution[1] / sum, convolution[2] / sum);
+end

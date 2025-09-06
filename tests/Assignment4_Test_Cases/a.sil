@@ -1,0 +1,14 @@
+begindecl
+  integer a, b;
+enddecl
+
+begin
+  read(a, b);
+  write(a, b);
+
+  read(a);
+  write(a, b); // Make sure b is not changed
+
+  read(b);
+  write(a, b); // Make sure a is not changed
+end

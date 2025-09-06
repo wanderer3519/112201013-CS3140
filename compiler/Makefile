@@ -12,12 +12,12 @@ clean:
 
 rebuild: clean all
 	mkdir -p ./outputs
-	bin/compiler ../Assignment4_Test_Cases/sample4.sil
+	bin/compiler ../tests/Assignment4_Test_Cases/sample4.sil
 
 build_mips:
 	mips-linux-gnu-gcc-10  outputs/mips.s
 	qemu-mips -L /usr/mips-linux-gnu/ a.out
 
 correct_mips:
-	mips-linux-gnu-gcc-10  ../Cprograms_and_MIPS_Assembly_Code/s1.s -o s1
+	mips-linux-gnu-gcc-10  ../tests/Cprograms_and_MIPS_Assembly_Code/s1.s -o s1
 	qemu-mips -L /usr/mips-linux-gnu/ s1
