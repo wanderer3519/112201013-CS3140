@@ -30,7 +30,7 @@
 │   ├── math.c
 │   └── symbol.c
 ├── CHANGELOG.md                  # Recorded changes over the phases of the project
-├── compiler                      # Has the core compiler for SIL language
+├── compiler                      # Has the core compiler code for SIL language
 │   ├── include
 │   │   ├── common.h
 │   │   └── tree.hpp
